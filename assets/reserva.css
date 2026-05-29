@@ -436,7 +436,16 @@
     }
     
     /* Ajuste para o Flatpickr em telas pequenas */
-    .flatpickr-calendar {
-        width: 300px !important;
+    .flatpickr-calendar.inline {
+        width: 100% !important;
+        max-width: 320px;
+        margin: 0 auto;
     }
+}
+
+/* Estilos extras para o calendário inline do usuário */
+#userInlinePicker .flatpickr-calendar {
+    box-shadow: none;
+    background: #1a1a1a;
+    border: 1px solid #333;
 }

@@ -42,11 +42,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <!-- Step 2: Datas -->
                     <div id="step2" class="step">
                         <h3>2. Seleção de Datas</h3>
-                        <div class="form-group">
-                            <label>Período de Estadia (Chegada e Saída)</label>
-                            <input type="text" id="dateRange" placeholder="Selecione o período">
+                        <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Selecione a data de chegada e depois a de saída no calendário abaixo:</p>
+                        <div id="userInlinePicker" style="margin-bottom: 15px;"></div>
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <button onclick="clearDateSelection()" style="background: #eee; border: 1px solid #ccc; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8em;">Limpar Seleção</button>
                         </div>
-                        <p id="diariasInfo" style="font-weight: bold; color: #3d85c6;"></p>
+                        <p id="diariasInfo" style="font-weight: bold; color: #3d85c6; text-align: center;"></p>
                     </div>
 
                     <!-- Step 3: Hóspedes -->
@@ -141,12 +142,14 @@ function configurarEventos() {
     document.getElementById('btnPrev').onclick = () => moveStep(-1);
     document.getElementById('btnConfirm').onclick = () => finishBooking();
 
-    datePicker = flatpickr("#dateRange", {
+    datePicker = flatpickr("#userInlinePicker", {
+        inline: true,
         mode: "range",
         minDate: "today",
-        dateFormat: "d/m/Y",
+        dateFormat: "Y-m-d",
         locale: "pt",
-        onClose: function(selectedDates) {
+        theme: "dark",
+        onChange: function(selectedDates) {
             if (selectedDates.length === 2) {
                 const start = selectedDates[0];
                 const end = selectedDates[1];
@@ -157,6 +160,8 @@ function configurarEventos() {
                 document.getElementById('diariasInfo').innerText = `Total de diárias: ${diff}`;
             } else {
                 reservaAtual.diarias = 0;
+                reservaAtual.checkIn = '';
+                reservaAtual.checkOut = '';
                 document.getElementById('diariasInfo').innerText = '';
             }
         }
@@ -317,6 +322,15 @@ function copyPix() {
     navigator.clipboard.writeText(code).then(() => alert('Código Pix copiado!'));
 }
 
+function clearDateSelection() {
+    if(datePicker) datePicker.clear();
+    reservaAtual.diarias = 0;
+    reservaAtual.checkIn = '';
+    reservaAtual.checkOut = '';
+    document.getElementById('diariasInfo').innerText = '';
+}
+
 window.changeGuest = changeGuest;
 window.copyPix = copyPix;
 window.openModalReserva = openModal;
+window.clearDateSelection = clearDateSelection;
