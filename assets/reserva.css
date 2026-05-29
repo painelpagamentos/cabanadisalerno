@@ -1,0 +1,292 @@
+/* Estilos para o fluxo de reserva */
+.reserva-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+}
+
+.reserva-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+    font-family: 'Bitter', serif;
+}
+
+.reserva-header {
+    background-color: #073763;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.reserva-header h2 {
+    margin: 0;
+    color: white !important;
+    font-family: 'Playfair Display SC', serif;
+}
+
+.reserva-body {
+    padding: 30px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.reserva-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    background: #f9f9f9;
+}
+
+.close-reserva {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Steps */
+.step {
+    display: none;
+}
+
+.step.active {
+    display: block;
+}
+
+/* Cabin List */
+.cabin-item {
+    display: flex;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s;
+    cursor: pointer;
+}
+
+.cabin-item:hover {
+    transform: translateY(-5px);
+    border-color: #3d85c6;
+}
+
+.cabin-item.selected {
+    border: 3px solid #3d85c6;
+    background-color: #f0f7ff;
+}
+
+.cabin-img {
+    width: 200px;
+    height: 150px;
+    object-fit: cover;
+}
+
+.cabin-info {
+    padding: 15px;
+    flex-grow: 1;
+}
+
+.cabin-info h3 {
+    margin-top: 0;
+    color: #073763;
+}
+
+.cabin-price {
+    font-weight: bold;
+    color: #3d85c6;
+    font-size: 1.2em;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #073763;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.date-row {
+    display: flex;
+    gap: 20px;
+}
+
+.date-row > div {
+    flex: 1;
+}
+
+/* Counters */
+.guest-counter {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.counter-btns {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.counter-btns button {
+    background: #f0f0f0;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.2s;
+}
+
+.counter-btns button:hover {
+    background: #e0e0e0;
+}
+
+.counter-btns span {
+    padding: 0 20px;
+    font-weight: bold;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Summary */
+.summary-box {
+    background: #f0f7ff;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 5px solid #3d85c6;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.summary-total {
+    border-top: 2px solid #3d85c6;
+    margin-top: 15px;
+    padding-top: 15px;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+
+.summary-pix {
+    color: #28a745;
+    font-weight: bold;
+}
+
+/* Pix Section */
+.pix-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.qr-placeholder {
+    width: 200px;
+    height: 200px;
+    background: #eee;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #ccc;
+}
+
+.pix-code {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    word-break: break-all;
+    font-family: monospace;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    position: relative;
+}
+
+.copy-btn {
+    background: #3d85c6;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* Buttons */
+.btn-next, .btn-prev, .btn-finish {
+    padding: 12px 25px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.btn-next, .btn-finish {
+    background-color: #3d85c6;
+    color: white;
+}
+
+.btn-prev {
+    background-color: #ccc;
+    color: #333;
+}
+
+.btn-reserva-main {
+    background-color: #3d85c6;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    transition: all 0.3s;
+    border: 2px solid #3d85c6;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-reserva-main:hover {
+    background-color: transparent;
+    color: #3d85c6;
+    transform: scale(1.02);
+}
+
+.capacity-warning {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: none;
+}
