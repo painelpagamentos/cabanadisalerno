@@ -66,15 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <!-- Step 2: Datas -->
                     <div id="step2" class="step">
                         <h3>2. Seleção de Datas</h3>
-                        <div class="date-row">
-                            <div class="form-group">
-                                <label>Check-in</label>
-                                <input type="date" id="checkin" min="${new Date().toISOString().split('T')[0]}">
-                            </div>
-                            <div class="form-group">
-                                <label>Check-out</label>
-                                <input type="date" id="checkout">
-                            </div>
+                        <div class="form-group">
+                            <label>Período de Estadia (Chegada e Saída)</label>
+                            <input type="text" id="dateRange" placeholder="Selecione o período">
                         </div>
                         <p id="diariasInfo" style="font-weight: bold; color: #3d85c6;"></p>
                     </div>
@@ -176,14 +170,28 @@ document.addEventListener('DOMContentLoaded', () => {
         list.appendChild(item);
     });
 
-    // Date inputs logic
-    const checkin = document.getElementById('checkin');
-    const checkout = document.getElementById('checkout');
-    checkin.onchange = () => {
-        checkout.min = checkin.value;
-        updateDiarias();
-    };
-    checkout.onchange = () => updateDiarias();
+    // Initialize Flatpickr for Date Range
+    flatpickr("#dateRange", {
+        mode: "range",
+        minDate: "today",
+        dateFormat: "d/m/Y",
+        locale: "pt",
+        onClose: function(selectedDates) {
+            if (selectedDates.length === 2) {
+                const start = selectedDates[0];
+                const end = selectedDates[1];
+                const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                
+                reservaAtual.diarias = diff;
+                reservaAtual.checkIn = start.toLocaleDateString('pt-BR');
+                reservaAtual.checkOut = end.toLocaleDateString('pt-BR');
+                document.getElementById('diariasInfo').innerText = `Total de diárias: ${diff}`;
+            } else {
+                reservaAtual.diarias = 0;
+                document.getElementById('diariasInfo').innerText = '';
+            }
+        }
+    });
 
     // Masks
     document.getElementById('respCpf').oninput = (e) => maskCpf(e.target);
@@ -239,7 +247,7 @@ function validateStep(step) {
     }
     if (step === 2) {
         if (!reservaAtual.checkIn || !reservaAtual.checkOut || reservaAtual.diarias <= 0) {
-            alert('Selecione datas válidas de check-in e check-out.');
+            alert('Selecione o período de estadia (data de entrada e saída).');
             return false;
         }
     }
@@ -256,21 +264,6 @@ function validateStep(step) {
         reservaAtual.telefone = tel;
     }
     return true;
-}
-
-function updateDiarias() {
-    const start = new Date(document.getElementById('checkin').value);
-    const end = new Date(document.getElementById('checkout').value);
-    if (start && end && end > start) {
-        const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-        reservaAtual.diarias = diff;
-        reservaAtual.checkIn = document.getElementById('checkin').value;
-        reservaAtual.checkOut = document.getElementById('checkout').value;
-        document.getElementById('diariasInfo').innerText = `Total de diárias: ${diff}`;
-    } else {
-        reservaAtual.diarias = 0;
-        document.getElementById('diariasInfo').innerText = '';
-    }
 }
 
 function changeGuest(type, val) {
