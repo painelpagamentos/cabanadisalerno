@@ -71,17 +71,24 @@ app.post('/api/admin/cabanas/update', (req, res) => {
     }
 });
 
-app.post('/api/admin/bloqueios/add', (req, res) => {
+app.post('/api/admin/bloqueios/sync', (req, res) => {
+    const { cabanaId, dates } = req.body;
     const data = getData();
-    data.bloqueios.push({ ...req.body, id: Date.now() });
-    saveData(data);
-    res.json({ success: true });
-});
-
-app.post('/api/admin/bloqueios/delete', (req, res) => {
-    const { id } = req.body;
-    const data = getData();
-    data.bloqueios = data.bloqueios.filter(b => b.id !== id);
+    
+    // Remover bloqueios antigos manuais (que não vêm de reserva) para esta cabana
+    data.bloqueios = data.bloqueios.filter(b => b.cabanaId !== cabanaId || b.reservaId);
+    
+    // Adicionar novos bloqueios (dia a dia para facilitar exibição do X)
+    dates.forEach(date => {
+        data.bloqueios.push({
+            id: Date.now() + Math.random(),
+            cabanaId,
+            inicio: date,
+            fim: date,
+            manual: true
+        });
+    });
+    
     saveData(data);
     res.json({ success: true });
 });

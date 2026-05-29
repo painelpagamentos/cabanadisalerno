@@ -284,6 +284,26 @@
     transform: scale(1.02);
 }
 
+/* Customização Flatpickr para datas ocupadas */
+.flatpickr-day.flatpickr-disabled, 
+.flatpickr-day.flatpickr-disabled:hover {
+    color: rgba(255, 0, 0, 0.5) !important;
+    position: relative;
+    cursor: not-allowed !important;
+}
+
+.flatpickr-day.flatpickr-disabled::after {
+    content: "X";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: red;
+    font-weight: bold;
+    font-size: 1.2em;
+    pointer-events: none;
+}
+
 .capacity-warning {
     color: #dc3545;
     font-size: 0.9em;

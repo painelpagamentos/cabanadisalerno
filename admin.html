@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Admin - Cabanas di Salerno</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700|Playfair+Display+SC:400,700|Bitter:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
     <style>
         body { font-family: 'Open Sans', sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
         .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
@@ -33,8 +35,20 @@
         .badge-pending { background: #fff3cd; color: #856404; }
         .badge-confirmed { background: #d4edda; color: #155724; }
         
-        .form-inline { display: flex; gap: 10px; align-items: center; }
+        .form-inline { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
         .form-inline input, .form-inline select { margin: 0; }
+
+        /* Estilo para o calendário de bloqueio */
+        .block-calendar-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px dashed #3d85c6;
+            border-radius: 10px;
+            background: #f0f7ff;
+            text-align: center;
+        }
+        .block-calendar-container.active { display: block; }
     </style>
 </head>
 <body>
@@ -77,32 +91,34 @@
         <div class="card">
             <h2>Bloquear Datas Manualmente</h2>
             <div class="form-inline">
-                <select id="blockCabin">
+                <select id="blockCabin" onchange="updateBlockCalendar()">
                     <option value="campanella">Campanella</option>
                     <option value="indrieri">Indrieri</option>
                     <option value="antunia">Antunia</option>
                     <option value="salerno">Salerno</option>
                 </select>
-                <input type="date" id="blockStart">
-                <input type="date" id="blockEnd">
-                <button onclick="addBloqueio()" style="width: auto;">Bloquear</button>
+                <button onclick="toggleBlockCalendar()" style="width: auto;">Abrir Calendário de Bloqueio</button>
             </div>
-            <table id="bloqueiosTable">
-                <thead>
-                    <tr>
-                        <th>Cabana</th>
-                        <th>Início</th>
-                        <th>Fim</th>
-                        <th>Ação</th>
-                    </tr>
-                </thead>
-                <tbody id="bloqueiosBody"></tbody>
-            </table>
+
+            <div id="blockCalendarContainer" class="block-calendar-container">
+                <p>Selecione as datas para bloquear/desbloquear (elas ficarão com um X para o cliente):</p>
+                <input type="text" id="blockMultiPicker" style="display:none">
+                <div id="inlinePicker"></div>
+                <div style="margin-top: 20px;">
+                    <button onclick="saveBloqueios()" style="width: 200px; background: #28a745;">Salvar Bloqueios</button>
+                    <button onclick="toggleBlockCalendar()" style="width: 200px; background: #6c757d; margin-left: 10px;">Cancelar</button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
     <script>
         let token = localStorage.getItem('adminToken');
+        let blockPicker = null;
+        let currentBloqueios = [];
+
         if(token) showDashboard();
 
         async function login() {
@@ -131,6 +147,7 @@
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             loadData();
+            initBlockPicker();
         }
 
         async function loadData() {
@@ -163,15 +180,50 @@
 
             // Load Bloqueios
             const resB = await fetch('/api/bloqueios');
-            const bloqueios = await resB.json();
-            document.getElementById('bloqueiosBody').innerHTML = bloqueios.map(b => `
-                <tr>
-                    <td>${b.cabanaId}</td>
-                    <td>${b.inicio}</td>
-                    <td>${b.fim}</td>
-                    <td><button onclick="deleteBloqueio(${b.id})" style="padding: 5px 10px; background: #cc0000; width: auto;">X</button></td>
-                </tr>
-            `).reverse().join('');
+            currentBloqueios = await resB.json();
+            updateBlockCalendar();
+        }
+
+        function initBlockPicker() {
+            blockPicker = flatpickr("#inlinePicker", {
+                inline: true,
+                mode: "multiple",
+                dateFormat: "Y-m-d",
+                locale: "pt",
+                theme: "dark"
+            });
+        }
+
+        function toggleBlockCalendar() {
+            const container = document.getElementById('blockCalendarContainer');
+            container.classList.toggle('active');
+            if(container.classList.contains('active')) updateBlockCalendar();
+        }
+
+        function updateBlockCalendar() {
+            if(!blockPicker) return;
+            const cabanaId = document.getElementById('blockCabin').value;
+            // Pegar datas bloqueadas para esta cabana
+            const dates = currentBloqueios
+                .filter(b => b.cabanaId === cabanaId)
+                .map(b => b.inicio); // No modo múltiplo, salvamos dia a dia
+            
+            blockPicker.setDate(dates);
+        }
+
+        async function saveBloqueios() {
+            const cabanaId = document.getElementById('blockCabin').value;
+            const dates = blockPicker.selectedDates.map(d => d.toISOString().split('T')[0]);
+            
+            await fetch('/api/admin/bloqueios/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cabanaId, dates })
+            });
+            
+            alert('Bloqueios salvos com sucesso!');
+            loadData();
+            toggleBlockCalendar();
         }
 
         async function updatePrice(id, valor) {
@@ -181,29 +233,8 @@
                 body: JSON.stringify({ id, valor })
             });
         }
-
-        async function addBloqueio() {
-            const cabanaId = document.getElementById('blockCabin').value;
-            const inicio = document.getElementById('blockStart').value;
-            const fim = document.getElementById('blockEnd').value;
-            if(!inicio || !fim) return alert('Selecione as datas');
-            
-            await fetch('/api/admin/bloqueios/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cabanaId, inicio, fim })
-            });
-            loadData();
-        }
-
-        async function deleteBloqueio(id) {
-            await fetch('/api/admin/bloqueios/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-            });
-            loadData();
-        }
     </script>
+</body>
+</html>
 </body>
 </html>
