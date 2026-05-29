@@ -1,0 +1,15 @@
+{
+  "name": "cabanas-di-salerno",
+  "version": "1.0.0",
+  "description": "Clone do site Cabanas di Salerno com fluxo de reserva",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
