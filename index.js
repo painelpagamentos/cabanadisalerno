@@ -87,8 +87,8 @@ app.post('/api/admin/bloqueios/delete', (req, res) => {
 });
 
 // For SPA-like behavior or clean URLs
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/cabanas', (req, res) => {
@@ -103,7 +103,11 @@ app.get('/contato', (req, res) => {
     res.sendFile(path.join(__dirname, 'contato.html'));
 });
 
-// Fallback for other routes
+app.get('/sabio', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Fallback for other routes (must be last)
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
