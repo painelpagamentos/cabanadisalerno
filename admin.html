@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Cabanas di Salerno</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700|Playfair+Display+SC:400,700|Bitter:400,700" rel="stylesheet">
+    <style>
+        body { font-family: 'Open Sans', sans-serif; background: #f4f7f6; margin: 0; padding: 0; }
+        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        .login-container h2 { font-family: 'Playfair Display SC', serif; color: #073763; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        button { background: #073763; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; }
+        button:hover { background: #3d85c6; }
+        
+        #dashboard { display: none; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .nav-admin { background: #073763; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .nav-admin h1 { margin: 0; font-size: 1.5em; font-family: 'Playfair Display SC', serif; }
+        
+        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .card h2 { border-bottom: 2px solid #3d85c6; padding-bottom: 10px; color: #073763; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #666; }
+        
+        .cabin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .cabin-card { border: 1px solid #eee; padding: 15px; border-radius: 8px; text-align: center; }
+        .cabin-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; }
+        .cabin-card input { text-align: center; font-size: 1.1em; font-weight: bold; color: #3d85c6; }
+        
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-confirmed { background: #d4edda; color: #155724; }
+        
+        .form-inline { display: flex; gap: 10px; align-items: center; }
+        .form-inline input, .form-inline select { margin: 0; }
+    </style>
+</head>
+<body>
+
+    <div id="loginSection" class="login-container">
+        <h2>Admin di Salerno</h2>
+        <input type="text" id="userInput" placeholder="Usuário">
+        <input type="password" id="passInput" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+    </div>
+
+    <div id="dashboard">
+        <div class="nav-admin">
+            <h1>Painel Administrativo</h1>
+            <button onclick="logout()" style="width: auto; background: #cc0000;">Sair</button>
+        </div>
+
+        <div class="card">
+            <h2>Preços das Cabanas</h2>
+            <div id="cabanasGrid" class="cabin-grid"></div>
+        </div>
+
+        <div class="card">
+            <h2>Últimas Reservas</h2>
+            <table id="reservasTable">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Hóspede</th>
+                        <th>Cabana</th>
+                        <th>Período</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="reservasBody"></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Bloquear Datas Manualmente</h2>
+            <div class="form-inline">
+                <select id="blockCabin">
+                    <option value="campanella">Campanella</option>
+                    <option value="indrieri">Indrieri</option>
+                    <option value="antunia">Antunia</option>
+                    <option value="salerno">Salerno</option>
+                </select>
+                <input type="date" id="blockStart">
+                <input type="date" id="blockEnd">
+                <button onclick="addBloqueio()" style="width: auto;">Bloquear</button>
+            </div>
+            <table id="bloqueiosTable">
+                <thead>
+                    <tr>
+                        <th>Cabana</th>
+                        <th>Início</th>
+                        <th>Fim</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="bloqueiosBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('adminToken');
+        if(token) showDashboard();
+
+        async function login() {
+            const user = document.getElementById('userInput').value;
+            const pass = document.getElementById('passInput').value;
+            const res = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, pass })
+            });
+            const data = await res.json();
+            if(data.success) {
+                localStorage.setItem('adminToken', data.token);
+                showDashboard();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            location.reload();
+        }
+
+        function showDashboard() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            loadData();
+        }
+
+        async function loadData() {
+            // Load Cabanas
+            const resC = await fetch('/api/cabanas');
+            const cabanas = await resC.json();
+            const grid = document.getElementById('cabanasGrid');
+            grid.innerHTML = cabanas.map(c => `
+                <div class="cabin-card">
+                    <img src="${c.foto}">
+                    <h3>${c.nome}</h3>
+                    <p>Valor Diária (R$):</p>
+                    <input type="number" value="${c.valor}" id="price-${c.id}" onchange="updatePrice('${c.id}', this.value)">
+                </div>
+            `).join('');
+
+            // Load Reservas
+            const resR = await fetch('/api/admin/reservas');
+            const reservas = await resR.json();
+            document.getElementById('reservasBody').innerHTML = reservas.map(r => `
+                <tr>
+                    <td>${new Date(r.id).toLocaleDateString()}</td>
+                    <td>${r.nome}<br><small>${r.telefone}</small></td>
+                    <td>${r.cabanaId}</td>
+                    <td>${r.checkIn} a ${r.checkOut}</td>
+                    <td>R$ ${r.total.toFixed(2)}</td>
+                    <td><span class="badge badge-confirmed">Confirmada</span></td>
+                </tr>
+            `).reverse().join('');
+
+            // Load Bloqueios
+            const resB = await fetch('/api/bloqueios');
+            const bloqueios = await resB.json();
+            document.getElementById('bloqueiosBody').innerHTML = bloqueios.map(b => `
+                <tr>
+                    <td>${b.cabanaId}</td>
+                    <td>${b.inicio}</td>
+                    <td>${b.fim}</td>
+                    <td><button onclick="deleteBloqueio(${b.id})" style="padding: 5px 10px; background: #cc0000; width: auto;">X</button></td>
+                </tr>
+            `).reverse().join('');
+        }
+
+        async function updatePrice(id, valor) {
+            await fetch('/api/admin/cabanas/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, valor })
+            });
+        }
+
+        async function addBloqueio() {
+            const cabanaId = document.getElementById('blockCabin').value;
+            const inicio = document.getElementById('blockStart').value;
+            const fim = document.getElementById('blockEnd').value;
+            if(!inicio || !fim) return alert('Selecione as datas');
+            
+            await fetch('/api/admin/bloqueios/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cabanaId, inicio, fim })
+            });
+            loadData();
+        }
+
+        async function deleteBloqueio(id) {
+            await fetch('/api/admin/bloqueios/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            loadData();
+        }
+    </script>
+</body>
+</html>
