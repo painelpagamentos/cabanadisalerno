@@ -49,6 +49,20 @@
             text-align: center;
         }
         .block-calendar-container.active { display: block; }
+
+        /* Responsividade Mobile Admin */
+        @media (max-width: 768px) {
+            .nav-admin { flex-direction: column; gap: 10px; text-align: center; }
+            .cabin-grid { grid-template-columns: 1fr; }
+            .form-inline { flex-direction: column; }
+            .form-inline select, .form-inline button, .form-inline input { width: 100%; }
+            .card { padding: 10px; overflow-x: auto; }
+            table { font-size: 0.8em; }
+            th, td { padding: 8px 4px; }
+            .badge { font-size: 0.7em; }
+            #blockCalendarContainer button { width: 100% !important; margin: 5px 0 !important; }
+            .flatpickr-calendar { margin: 0 auto; }
+        }
     </style>
 </head>
 <body>
