@@ -384,6 +384,38 @@
         text-align: center;
         box-sizing: border-box;
     }
+
+    /* Centralizar e diminuir logo no mobile */
+    .cs-widget.cs-image-widget {
+        text-align: center !important;
+        width: 100% !important;
+    }
+
+    .cs-widget.cs-image-widget img {
+        max-width: 150px !important; /* Logo menor */
+        height: auto !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+
+    /* Ajustar layout do cabeçalho mobile */
+    #c4bb3958-65ae-43c1-9289-fff5bd9b2d99 {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    /* Garantir botão reserva visível no mobile */
+    .cs-menu-items li {
+        margin: 10px 0 !important;
+        width: 100%;
+        text-align: center;
+    }
+
+    .cs-menu-items li .btn-reserva-main {
+        display: block !important;
+        margin: 0 auto !important;
+        max-width: 250px;
+    }
     
     /* Ajuste para o Flatpickr em telas pequenas */
     .flatpickr-calendar {
