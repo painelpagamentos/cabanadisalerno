@@ -387,34 +387,52 @@
 
     /* Centralizar e diminuir logo no mobile */
     .cs-widget.cs-image-widget {
-        text-align: center !important;
-        width: 100% !important;
+        text-align: left !important;
+        width: auto !important;
+        flex: 1 !important;
     }
 
     .cs-widget.cs-image-widget img {
-        max-width: 150px !important; /* Logo menor */
+        max-width: 100px !important; /* Logo ainda menor para caber botão ao lado */
         height: auto !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         display: block !important;
     }
 
     /* Ajustar layout do cabeçalho mobile */
     #c4bb3958-65ae-43c1-9289-fff5bd9b2d99 {
-        flex-direction: column !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
         align-items: center !important;
+        padding: 10px !important;
+        gap: 10px !important;
     }
 
-    /* Garantir botão reserva visível no mobile */
-    .cs-menu-items li {
-        margin: 10px 0 !important;
-        width: 100%;
-        text-align: center;
+    /* Posicionar botão reserva ao lado da logo */
+    .cs-menu-items li:last-child {
+        position: static !important;
+        margin: 0 !important;
+        width: auto !important;
     }
 
-    .cs-menu-items li .btn-reserva-main {
+    /* Mover o botão do menu para o cabeçalho no mobile */
+    .btn-reserva-header-mobile {
         display: block !important;
-        margin: 0 auto !important;
-        max-width: 250px;
+        background-color: #3d85c6;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border: none;
+        white-space: nowrap;
+        order: 2;
+    }
+
+    /* Esconder o botão original dentro do menu no mobile se necessário */
+    .cs-menu-items .btn-reserva-main {
+        display: none !important;
     }
     
     /* Ajuste para o Flatpickr em telas pequenas */
