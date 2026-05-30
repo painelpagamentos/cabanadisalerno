@@ -318,9 +318,37 @@
         margin: 2% auto;
     }
 
+    .reserva-header h2 {
+        font-size: 1.2em !important; /* Texto do cabeçalho menor */
+    }
+
     .reserva-body {
         padding: 15px;
         max-height: 80vh;
+    }
+
+    .reserva-body h3 {
+        font-size: 1.1em !important; /* Títulos dos passos menores */
+        text-align: center;
+    }
+
+    .reserva-body p, .reserva-body label {
+        font-size: 0.9em !important; /* Textos de apoio menores */
+        text-align: center;
+    }
+
+    .cabin-info h3 {
+        font-size: 1em !important;
+        text-align: left;
+    }
+
+    .cabin-info p {
+        font-size: 0.85em !important;
+        text-align: left;
+    }
+
+    .cabin-price {
+        font-size: 1em !important;
     }
 
     .cabin-img {
@@ -391,16 +419,26 @@
 
     /* Centralizar e diminuir logo no mobile */
     .cs-widget.cs-image-widget {
-        text-align: left !important;
-        width: auto !important;
-        flex: 1 !important;
+        text-align: center !important;
+        width: 100% !important;
     }
 
     .cs-widget.cs-image-widget img {
-        max-width: 100px !important; /* Logo ainda menor para caber botão ao lado */
+        max-width: 120px !important; /* Logo ainda menor para mobile */
         height: auto !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         display: block !important;
+    }
+
+    /* Centralizar logo no rodapé */
+    footer .cs-widget.cs-image-widget {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    footer .cs-widget.cs-image-widget img {
+        margin: 0 auto !important;
     }
 
     /* Ajustar layout do cabeçalho mobile */
