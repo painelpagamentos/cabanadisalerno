@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <!-- Step 2: Datas -->
                     <div id="step2" class="step">
                         <h3>2. Seleção de Datas</h3>
+                        <div id="selectedCabinNameDisplay"></div>
                         <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Selecione a data de chegada e depois a de saída no calendário abaixo:</p>
                         <div id="userInlinePicker" style="margin-bottom: 15px;"></div>
                         <div style="text-align: center; margin-bottom: 15px;">
@@ -217,6 +218,12 @@ function selectCabin(id, element) {
     reservaAtual.cabanaId = id;
     document.querySelectorAll('.cabin-item').forEach(el => el.classList.remove('selected'));
     element.classList.add('selected');
+
+    const cabana = cabanas.find(c => c.id === id);
+    if (cabana) {
+        const display = document.getElementById('selectedCabinNameDisplay');
+        if (display) display.innerText = "Você está reservando: " + cabana.nome;
+    }
 
     // Atualizar datas bloqueadas no calendário para esta cabana
     const bloqueiosCabana = bloqueios
