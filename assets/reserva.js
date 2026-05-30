@@ -176,19 +176,42 @@ function renderizarCabanas() {
     list.innerHTML = '';
     cabanas.forEach(c => {
         const item = document.createElement('div');
-        item.className = 'cabin-item';
+        item.className = 'cabin-item-wrapper'; // Wrapper para conter o card e o botão
         item.innerHTML = `
-            <img src="${c.foto}" class="cabin-img">
-            <div class="cabin-info">
-                <h3>${c.nome}</h3>
-                <p>Capacidade: ${c.capacidade} pessoas</p>
-                <p class="cabin-price">R$ ${c.valor.toFixed(2)} / diária</p>
+            <div class="cabin-item" onclick="selectCabin('${c.id}', this)">
+                <img src="${c.foto}" class="cabin-img">
+                <div class="cabin-info">
+                    <h3>${c.nome}</h3>
+                    <p>Capacidade: ${c.capacidade} pessoas</p>
+                    <p class="cabin-price">R$ ${c.valor.toFixed(2)} / diária</p>
+                </div>
             </div>
+            <button class="btn-reserva-main btn-reserva-inline" onclick="iniciarReservaDireta('${c.id}')">FAZER MINHA RESERVA</button>
         `;
-        item.onclick = () => selectCabin(c.id, item);
         list.appendChild(item);
     });
 }
+
+function iniciarReservaDireta(id) {
+    // Se estivermos na home (fora do modal), abre o modal e já seleciona a cabana
+    if (document.getElementById('modalReserva').style.display !== 'block') {
+        openModal();
+    }
+    
+    // Seleciona a cabana visualmente na lista dentro do modal
+    const items = document.querySelectorAll('.cabin-item');
+    items.forEach(item => {
+        // Encontrar o card correspondente ao ID
+        if (item.getAttribute('onclick').includes(id)) {
+            selectCabin(id, item);
+        }
+    });
+
+    // Pula para o próximo passo (Datas)
+    moveStep(1);
+}
+
+window.iniciarReservaDireta = iniciarReservaDireta;
 
 function selectCabin(id, element) {
     reservaAtual.cabanaId = id;
