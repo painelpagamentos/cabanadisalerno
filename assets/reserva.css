@@ -441,6 +441,22 @@
         margin: 0 auto !important;
     }
 
+    /* Ajuste de fonte para a seção descritiva no mobile */
+    #localizacao-maps h2 {
+        font-size: 1.4em !important;
+        margin-bottom: 20px !important;
+    }
+
+    #localizacao-maps div[style*="font-family: 'Bitter'"] {
+        font-size: 0.85em !important;
+        line-height: 1.6 !important;
+    }
+
+    #localizacao-maps h3 {
+        font-size: 1.1em !important;
+        margin-top: 30px !important;
+    }
+
     /* Ajustar layout do cabeçalho mobile */
     #c4bb3958-65ae-43c1-9289-fff5bd9b2d99 {
         flex-direction: row !important;
