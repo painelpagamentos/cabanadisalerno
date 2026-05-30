@@ -470,19 +470,20 @@
         line-height: 1.5 !important;
     }
 
-    /* Ajuste de fonte para a nova seção de localização no mobile */
-    #dca76c59-2076-4cb9-9c57-7b26f4006e93 h5 span span {
-        font-size: 20px !important;
+    /* Ajuste de fonte para a seção descritiva no mobile */
+    #localizacao-maps h2 {
+        font-size: 1.4em !important;
+        margin-bottom: 20px !important;
     }
 
-    #dca76c59-2076-4cb9-9c57-7b26f4006e93 p span {
-        font-size: 14px !important;
-        line-height: 1.5 !important;
+    #localizacao-maps div[style*="font-family: 'Bitter'"] {
+        font-size: 0.85em !important;
+        line-height: 1.6 !important;
     }
 
-    #dca76c59-2076-4cb9-9c57-7b26f4006e93 .text-editor h5, 
-    #dca76c59-2076-4cb9-9c57-7b26f4006e93 .text-editor p {
-        text-align: center !important; /* Centralizar no mobile */
+    #localizacao-maps h3 {
+        font-size: 1.1em !important;
+        margin-top: 30px !important;
     }
 
     /* Ajustar layout do cabeçalho mobile */
