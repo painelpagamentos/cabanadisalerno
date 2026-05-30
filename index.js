@@ -98,7 +98,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/cabanas', (req, res) => {
+app.get('/informacoes', (req, res) => {
     res.sendFile(path.join(__dirname, 'cabanas.html'));
 });
 
