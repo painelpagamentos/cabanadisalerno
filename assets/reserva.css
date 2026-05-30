@@ -323,13 +323,17 @@
         max-height: 80vh;
     }
 
-    .cabin-item {
-        flex-direction: column;
-    }
-
     .cabin-img {
         width: 100%;
-        height: 180px;
+        height: 220px; /* Altura um pouco maior para melhor proporção */
+        object-fit: cover; /* Garante que a imagem preencha o espaço sem esticar */
+        object-position: center;
+    }
+
+    .cabin-item {
+        flex-direction: column;
+        border-radius: 12px; /* Cantos mais arredondados */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Leve sombra para destacar o card */
     }
 
     .cabin-info {
