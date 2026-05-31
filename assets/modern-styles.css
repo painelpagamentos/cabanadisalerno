@@ -222,13 +222,53 @@ nav ul li a:hover {
 }
 
 /* Cabin Image Gallery (Horizontal Scroll Snap) */
+.gallery-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  font-size: 24px;
+  color: var(--primary);
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.slider-btn:hover {
+  background: var(--primary);
+  color: #fff;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
+
+.prev-btn {
+  left: 15px;
+}
+
+.next-btn {
+  right: 15px;
+}
+
 .cabin-gallery {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   scrollbar-width: none; /* Firefox */
-  height: 250px;
+  height: 350px; /* Increased height for better view */
 }
 
 .cabin-gallery::-webkit-scrollbar {
@@ -388,6 +428,20 @@ footer {
 @media (max-width: 768px) {
   .hero h1 {
     font-size: 2.5rem;
+  }
+  
+  .slider-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+  
+  .prev-btn {
+    left: 10px;
+  }
+  
+  .next-btn {
+    right: 10px;
   }
   
   nav ul {
