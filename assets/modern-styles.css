@@ -82,6 +82,32 @@ nav ul li a:hover {
   color: var(--primary);
   cursor: pointer;
 }
+/* Mobile responsive header */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+  nav ul {
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background: var(--glass-bg);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  nav ul.active {
+    max-height: 500px;
+  }
+  nav ul li {
+    margin: 1rem 0;
+    text-align: center;
+  }
+}
+
 
 /* Hero Section */
 .hero {
