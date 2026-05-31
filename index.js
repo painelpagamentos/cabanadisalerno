@@ -99,8 +99,10 @@ app.get('/', (req, res) => {
 });
 
 
-    res.sendFile(path.join(__dirname, 'cabanas.html'));
-});
+    // New route for cabanas
+    app.get('/cabanas', (req, res) => {
+        res.sendFile(path.join(__dirname, 'cabanas.html'));
+    });
 
 app.get('/quem-somos', (req, res) => {
     res.sendFile(path.join(__dirname, 'quem-somos.html'));
