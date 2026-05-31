@@ -307,7 +307,69 @@ function updateSummary() {
     `;
 }
 
+// Blackcat Pay integration
+async function createPixCharge(amount, description) {
+    // TODO: Replace with your actual Blackcat Pay API credentials
+    const API_KEY = 'YOUR_BLACKCAT_API_KEY';
+    const response = await fetch('https://api.blackcatpay.com.br/v1/pix', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+            amount: amount,
+            description: description,
+            // optional: payer information, expiration, etc.
+        })
+    });
+    if (!response.ok) {
+        throw new Error('Failed to create PIX charge');
+    }
+    const data = await response.json();
+    // Expected fields: qrCodeUrl, copyPaste (Copia e Cola)
+    return {
+        qrCodeUrl: data.qrCodeUrl || data.qr_image,
+        copyPaste: data.copyPaste || data.copiable || ''
+    };
+}
+
+// Updated finishBooking to generate PIX before sending reservation
 async function finishBooking() {
+    // Calculate total amount to charge (already stored in reservaAtual.total)
+    const amount = reservaAtual.total;
+    const description = `Reserva Cabana ${reservaAtual.cabanaId} - ${reservaAtual.checkIn} to ${reservaAtual.checkOut}`;
+    try {
+        const pixData = await createPixCharge(amount, description);
+        // Update UI with PIX info
+        const pixImg = document.querySelector('#step6 .qr-placeholder img');
+        if (pixImg && pixData.qrCodeUrl) {
+            pixImg.src = pixData.qrCodeUrl;
+        }
+        const pixCodeEl = document.getElementById('pixCode');
+        if (pixCodeEl) {
+            pixCodeEl.innerText = pixData.copyPaste;
+        }
+        // Show confirmation button only after PIX is ready
+        document.getElementById('btnConfirm').style.display = 'block';
+    } catch (e) {
+        alert('Erro ao gerar PIX: ' + e.message);
+        return;
+    }
+
+    // Send reservation data to backend after payment is confirmed (simulated here)
+    const res = await fetch('/api/reservas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reservaAtual)
+    });
+    const data = await res.json();
+    if (data.success) {
+        alert('Reserva enviada com sucesso! Pagamento confirmado.');
+        location.reload();
+    }
+}
+
     const res = await fetch('/api/reservas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
