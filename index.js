@@ -1,8 +1,9 @@
-const express = require('express');
+require('dotenv').config();
+const PORT = process.env.PORT || 3000;
 const path = require('path');
 const fs = require('fs');
 const app = express();
-const PORT = process.env.PORT || 3000;
+require('dotenv').config();
 
 app.use(express.json());
 app.use(express.static(__dirname));

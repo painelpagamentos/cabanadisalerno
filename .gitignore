@@ -1,7 +1,3 @@
-.DS_Store
-Thumbs.db
-*.log
-urls.txt
 node_modules/
-.vscode/
-.idea/
+.env
+.DS_Store
