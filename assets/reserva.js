@@ -194,11 +194,11 @@ function renderizarCabanas() {
 }
 
 function iniciarReservaDireta(id) {
-    // Se estivermos na home (fora do modal), abre o modal e já seleciona a cabana
-    if (document.getElementById('modalReserva').style.display !== 'block') {
-        openModal();
-    }
-    
+    console.log('FAZER MINHA RESERVA clicked, id:', id);
+    // Abre o modal sempre
+    openModal();
+    alert('Função iniciarReservaDireta executada'); // Debug alert
+    console.log('Modal opened');
     // Seleciona a cabana visualmente na lista dentro do modal
     const items = document.querySelectorAll('.cabin-item');
     items.forEach(item => {
@@ -207,7 +207,6 @@ function iniciarReservaDireta(id) {
             selectCabin(id, item);
         }
     });
-
     // Pula para o próximo passo (Datas)
     moveStep(1);
 }
@@ -370,20 +369,11 @@ async function finishBooking() {
     }
 }
 
-    const res = await fetch('/api/reservas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reservaAtual)
-    });
-    const data = await res.json();
-    if(data.success) {
-        alert('Reserva enviada com sucesso! Pagamento confirmado.');
-        location.reload();
-    }
+
 }
 
 function openModal() {
-    document.getElementById('modalReserva').style.display = 'block';
+    document.getElementById('modalReserva').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
 
@@ -424,5 +414,5 @@ function clearDateSelection() {
 
 window.changeGuest = changeGuest;
 window.copyPix = copyPix;
-window.openModalReserva = openModal;
+window.iniciarReservaDireta = iniciarReservaDireta;
 window.clearDateSelection = clearDateSelection;
