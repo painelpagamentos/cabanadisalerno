@@ -98,7 +98,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.get('/informacoes', (req, res) => {
+
     res.sendFile(path.join(__dirname, 'cabanas.html'));
 });
 
@@ -106,9 +106,7 @@ app.get('/quem-somos', (req, res) => {
     res.sendFile(path.join(__dirname, 'quem-somos.html'));
 });
 
-app.get('/contato', (req, res) => {
-    res.sendFile(path.join(__dirname, 'contato.html'));
-});
+// Removed contato route as per user request
 
 app.get('/sabio', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
