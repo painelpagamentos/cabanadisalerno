@@ -6,6 +6,8 @@ let reservaAtual = {
     cabanaId: null,
     checkIn: '',
     checkOut: '',
+    checkInTime: '14:00',
+    checkOutTime: '14:00',
     diarias: 0,
     adultos: 1,
     criancas: 0,
@@ -21,79 +23,20 @@ let stepAtual = 1;
 let datePicker = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Carregar dados iniciais da API
+    const isReservaPage = !!document.getElementById('cabanaSelect');
+    if (!isReservaPage) return;
+
     await carregarDados();
-
-    // Inserir Modal de Reserva no Body
-    const modalHtml = `
-        <div id="modalReserva" class="reserva-modal">
-            <div class="reserva-content">
-                <span class="close-reserva">&times;</span>
-                <div class="reserva-header">
-                    <h2>Fazer Minha Reserva</h2>
-                </div>
-                <div class="reserva-body">
-                    <!-- Step 1: Datas -->
-                    <div id="step1" class="step active">
-                        <h3>1. Seleção de Datas</h3>
-                        <div id="selectedCabinNameDisplay"></div>
-                        <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Selecione a data de chegada e depois a de saída no calendário abaixo:</p>
-                        <div id="userInlinePicker" style="margin-bottom: 15px;"></div>
-                        <p id="diariasInfo" style="font-weight: bold; color: #3d85c6; text-align: center;"></p>
-                    </div>
-
-                    <!-- Step 2: Dados -->
-                    <div id="step2" class="step">
-                        <h3>2. Seus Dados</h3>
-                        <div class="form-group">
-                            <label>Nome Completo</label>
-                            <input type="text" id="respNome" placeholder="Seu nome completo">
-                        </div>
-                        <div class="form-group">
-                            <label>CPF</label>
-                            <input type="text" id="respCpf" placeholder="000.000.000-00">
-                        </div>
-                        <div class="form-group">
-                            <label>WhatsApp</label>
-                            <input type="text" id="respTel" placeholder="(00) 00000-0000">
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Resumo -->
-                    <div id="step3" class="step">
-                        <h3>3. Resumo da Reserva</h3>
-                        <div id="summaryContent" class="summary-box"></div>
-                    </div>
-
-                    <!-- Step 4: Pagamento Pix -->
-                    <div id="step4" class="step">
-                        <h3>4. Pagamento de Sinal (50%)</h3>
-                        <div id="summaryContentPayment" class="summary-box" style="margin-bottom: 20px;"></div>
-                        <div class="pix-container">
-                            <p>Escaneie o QR Code abaixo para pagar o sinal de 50%:</p>
-                            <div class="qr-placeholder">
-                                <img id="pixQrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=Reserva_Cabanas_di_Salerno" alt="QR Code Pix">
-                            </div>
-                            <p>Ou utilize o código Copia e Cola:</p>
-                            <div class="pix-code" id="pixCode">Aguardando geração do PIX...</div>
-                            <button class="copy-btn" onclick="copyPix()">Copiar Código Pix</button>
-                            <div style="margin-top: 20px; font-weight: bold; color: #ff9900;">
-                                Status: Aguardando pagamento...
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="reserva-footer">
-                    <button id="btnPrev" class="btn-prev" style="visibility: hidden;">Anterior</button>
-                    <button id="btnNext" class="btn-next">Próximo</button>
-                    <button id="btnConfirm" class="btn-finish" style="display: none;">Confirmar e Ir para Pagamento</button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
     configurarEventos();
+    preencherSelectCabanas();
+
+    const params = new URLSearchParams(window.location.search);
+    const preselectCabanaId = params.get('cabana');
+    if (preselectCabanaId) {
+        const select = document.getElementById('cabanaSelect');
+        if (select) select.value = preselectCabanaId;
+        selectCabin(preselectCabanaId);
+    }
 });
 
 async function carregarDados() {
@@ -106,12 +49,14 @@ async function carregarDados() {
 }
 
 function configurarEventos() {
-    document.querySelector('.close-reserva').onclick = () => closeModal();
-    document.getElementById('btnNext').onclick = () => moveStep(1);
-    document.getElementById('btnPrev').onclick = () => moveStep(-1);
-    document.getElementById('btnConfirm').onclick = () => confirmarEIrParaPagamento();
+    const btnNext = document.getElementById('btnNext');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnConfirm = document.getElementById('btnConfirm');
+    if (btnNext) btnNext.onclick = () => moveStep(1);
+    if (btnPrev) btnPrev.onclick = () => moveStep(-1);
+    if (btnConfirm) btnConfirm.onclick = () => confirmarEIrParaPagamento();
 
-    datePicker = flatpickr("#userInlinePicker", {
+    datePicker = flatpickr('#userInlinePicker', {
         inline: true,
         mode: "range",
         minDate: "today",
@@ -119,6 +64,7 @@ function configurarEventos() {
         locale: "pt",
         theme: "dark",
         onChange: function(selectedDates) {
+            const diariasInfo = document.getElementById('diariasInfo');
             if (selectedDates.length === 2) {
                 const start = selectedDates[0];
                 const end = selectedDates[1];
@@ -126,18 +72,89 @@ function configurarEventos() {
                 reservaAtual.diarias = diff;
                 reservaAtual.checkIn = start.toISOString().split('T')[0];
                 reservaAtual.checkOut = end.toISOString().split('T')[0];
-                document.getElementById('diariasInfo').innerText = `Total de diárias: ${diff}`;
+                if (diariasInfo) diariasInfo.innerText = `Total de diárias: ${diff}`;
             } else {
                 reservaAtual.diarias = 0;
                 reservaAtual.checkIn = '';
                 reservaAtual.checkOut = '';
-                document.getElementById('diariasInfo').innerText = '';
+                if (diariasInfo) diariasInfo.innerText = '';
             }
         }
     });
 
-    document.getElementById('respCpf').oninput = (e) => maskCpf(e.target);
-    document.getElementById('respTel').oninput = (e) => maskTel(e.target);
+    const timeCheckin = document.getElementById('timeCheckin');
+    const timeCheckout = document.getElementById('timeCheckout');
+    if (timeCheckin) {
+        reservaAtual.checkInTime = timeCheckin.value || reservaAtual.checkInTime;
+        reservaAtual.checkOutTime = reservaAtual.checkInTime;
+        if (timeCheckout) timeCheckout.value = reservaAtual.checkOutTime;
+
+        timeCheckin.oninput = (e) => {
+            const value = e.target.value || '14:00';
+            reservaAtual.checkInTime = value;
+            reservaAtual.checkOutTime = value;
+            if (timeCheckout) timeCheckout.value = value;
+        };
+    }
+
+    const respCpf = document.getElementById('respCpf');
+    const respTel = document.getElementById('respTel');
+    if (respCpf) respCpf.oninput = (e) => maskCpf(e.target);
+    if (respTel) respTel.oninput = (e) => maskTel(e.target);
+
+    const cabanaSelect = document.getElementById('cabanaSelect');
+    if (cabanaSelect) {
+        cabanaSelect.onchange = (e) => {
+            const id = e.target.value;
+            resetReserva();
+            if (id) selectCabin(id);
+        };
+    }
+}
+
+function preencherSelectCabanas() {
+    const select = document.getElementById('cabanaSelect');
+    if (!select) return;
+
+    select.innerHTML = '';
+    const optPlaceholder = document.createElement('option');
+    optPlaceholder.value = '';
+    optPlaceholder.textContent = 'Selecione uma cabana';
+    select.appendChild(optPlaceholder);
+
+    cabanas.forEach((c) => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.nome;
+        select.appendChild(opt);
+    });
+}
+
+function resetReserva() {
+    reservaAtual.cabanaId = null;
+    reservaAtual.checkIn = '';
+    reservaAtual.checkOut = '';
+    reservaAtual.checkInTime = '14:00';
+    reservaAtual.checkOutTime = '14:00';
+    reservaAtual.diarias = 0;
+    reservaAtual.total = 0;
+    reservaAtual.sinal = 0;
+    reservaAtual.restante = 0;
+
+    const display = document.getElementById('selectedCabinNameDisplay');
+    if (display) display.innerText = '';
+    const diariasInfo = document.getElementById('diariasInfo');
+    if (diariasInfo) diariasInfo.innerText = '';
+
+    if (datePicker) {
+        datePicker.clear();
+        datePicker.set('disable', []);
+    }
+
+    const timeCheckin = document.getElementById('timeCheckin');
+    const timeCheckout = document.getElementById('timeCheckout');
+    if (timeCheckin) timeCheckin.value = reservaAtual.checkInTime;
+    if (timeCheckout) timeCheckout.value = reservaAtual.checkOutTime;
 }
 
 function selectCabin(id) {
@@ -148,24 +165,19 @@ function selectCabin(id) {
         const display = document.getElementById('selectedCabinNameDisplay');
         if (display) display.innerText = "Você está reservando: " + cabana.nome;
         
-        // Atualizar datas bloqueadas no calendário IMEDIATAMENTE para esta cabana
         const bloqueiosCabana = bloqueios
             .filter(b => b.cabanaId === id)
             .map(b => ({ from: b.inicio, to: b.fim }));
         
         if (datePicker) {
-            datePicker.clear(); // Limpa seleção anterior se houver
+            datePicker.clear();
             datePicker.set('disable', bloqueiosCabana);
         }
     }
 }
 
 function iniciarReservaDireta(id) {
-    // Definir a cabana selecionada e configurar calendário ANTES de abrir o modal
-    selectCabin(id);
-    
-    // Abrir o modal de reserva já no passo 1 (Datas)
-    openModalReserva();
+    window.location.href = `/reserva?cabana=${encodeURIComponent(id)}`;
 }
 
 function moveStep(dir) {
@@ -212,6 +224,12 @@ function validateStep(step) {
     if (step === 1) {
         if (!reservaAtual.cabanaId) return alert('Selecione uma cabana primeiro.');
         if (!reservaAtual.checkIn || !reservaAtual.checkOut) return alert('Selecione o período.');
+
+        const timeCheckin = document.getElementById('timeCheckin');
+        const selectedTime = timeCheckin ? timeCheckin.value : reservaAtual.checkInTime;
+        if (!selectedTime) return alert('Selecione o horário de check-in.');
+        reservaAtual.checkInTime = selectedTime;
+        reservaAtual.checkOutTime = selectedTime;
     }
     if (step === 2) {
         const nome = document.getElementById('respNome').value;
@@ -248,6 +266,7 @@ function updateSummary() {
         <div class="summary-row"><span>Cabana:</span> <strong>${cabana.nome}</strong></div>
         <div class="summary-row"><span>Diária:</span> <strong>R$ ${cabana.valor.toFixed(2)}</strong></div>
         <div class="summary-row"><span>Período:</span> <strong>${periodoFormatado}</strong></div>
+        <div class="summary-row"><span>Horário (check-in e check-out):</span> <strong>${reservaAtual.checkInTime}</strong></div>
         <div class="summary-row"><span>Diárias:</span> <strong>${reservaAtual.diarias}</strong></div>
         <div class="summary-row summary-total"><span>TOTAL:</span> <strong>R$ ${reservaAtual.total.toFixed(2)}</strong></div>
         <div class="summary-row summary-pix"><span>SINAL (50%):</span> <strong>R$ ${reservaAtual.sinal.toFixed(2)}</strong></div>
@@ -319,7 +338,7 @@ async function confirmarEIrParaPagamento() {
 async function gerarPix() {
     // Calculate total amount to charge (using signal 50% as per UI)
     const amount = reservaAtual.sinal;
-    const description = `Sinal Reserva Cabana ${reservaAtual.cabanaId} - ${reservaAtual.checkIn} to ${reservaAtual.checkOut}`;
+    const description = `Sinal Reserva Cabana ${reservaAtual.cabanaId} - ${reservaAtual.checkIn} to ${reservaAtual.checkOut} - ${reservaAtual.checkInTime}`;
     
     console.log('Iniciando gerarPix...', { amount, description });
 
@@ -349,31 +368,6 @@ async function gerarPix() {
     }
 }
 
-function openModal() {
-    document.getElementById('modalReserva').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-function openModalReserva() {
-    if (!reservaAtual.cabanaId) {
-        alert('Selecione uma cabana clicando em "FAZER MINHA RESERVA".');
-        return;
-    }
-
-    // Garantir que comece no primeiro passo
-    stepAtual = 1;
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step1').classList.add('active');
-    
-    updateButtonVisibility();
-    openModal();
-}
-
-function closeModal() {
-    document.getElementById('modalReserva').style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
 function maskCpf(i) {
     let v = i.value.replace(/\D/g, '');
     if (v.length > 11) v = v.substring(0, 11);
@@ -396,16 +390,6 @@ function copyPix() {
     navigator.clipboard.writeText(code).then(() => alert('Código Pix copiado!'));
 }
 
-function clearDateSelection() {
-    if(datePicker) datePicker.clear();
-    reservaAtual.diarias = 0;
-    reservaAtual.checkIn = '';
-    reservaAtual.checkOut = '';
-    document.getElementById('diariasInfo').innerText = '';
-}
-
 window.copyPix = copyPix;
 window.iniciarReservaDireta = iniciarReservaDireta;
-window.clearDateSelection = clearDateSelection;
-window.openModalReserva = openModalReserva;
-window.selectCabin = selectCabin;
+window.openModalReserva = () => window.location.href = '/reserva';

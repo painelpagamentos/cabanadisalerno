@@ -538,3 +538,152 @@
     background: #1a1a1a;
     border: 1px solid #333;
 }
+
+.reserva-page {
+    padding-top: 110px;
+    padding-bottom: 60px;
+}
+
+.reserva-page__container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 5%;
+}
+
+.reserva-page__header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.reserva-page__header h1 {
+    font-family: 'Playfair Display', serif;
+    color: #073763;
+    margin: 0 0 10px;
+}
+
+.reserva-page__header p {
+    margin: 0;
+    color: #4a4a4a;
+    font-family: 'Inter', sans-serif;
+}
+
+.reserva-page__card {
+    background: rgba(255,255,255,0.9);
+    border: 1px solid rgba(7,55,99,0.12);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.reserva-page__top {
+    padding: 18px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.reserva-page__field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #073763;
+    font-family: 'Inter', sans-serif;
+}
+
+.reserva-page__field select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+}
+
+.reserva-page__selected {
+    font-weight: 600;
+    color: #3d85c6;
+    font-family: 'Inter', sans-serif;
+}
+
+.reserva-page__steps {
+    padding: 22px 20px;
+}
+
+.reserva-page__steps h3 {
+    font-family: 'Playfair Display', serif;
+    color: #073763;
+    margin-top: 0;
+}
+
+.reserva-page__hint {
+    margin: 0 0 12px;
+    color: #666;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95em;
+}
+
+.reserva-page__calendar {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0 14px;
+}
+
+.reserva-page__time {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 10px 0 14px;
+}
+
+.reserva-page__time input[type="time"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    background: #fff;
+}
+
+.reserva-page__time input[type="time"][disabled] {
+    background: #f1f3f5;
+    color: #666;
+}
+
+.reserva-page__diarias {
+    font-weight: 700;
+    color: #3d85c6;
+    text-align: center;
+    margin: 0;
+}
+
+.reserva-page__footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    background: #f9f9f9;
+}
+
+@media (min-width: 900px) {
+    .reserva-page__top {
+        grid-template-columns: 340px 1fr;
+        align-items: end;
+    }
+    .reserva-page__time {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+    }
+}
+
+@media (max-width: 768px) {
+    .reserva-page__footer {
+        flex-direction: column-reverse;
+    }
+    .reserva-page__footer button {
+        width: 100%;
+    }
+}

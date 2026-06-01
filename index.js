@@ -260,6 +260,10 @@ app.get('/quem-somos', (req, res) => {
     res.sendFile(path.join(__dirname, 'quem-somos.html'));
 });
 
+app.get('/reserva', (req, res) => {
+    res.sendFile(path.join(__dirname, 'reserva.html'));
+});
+
 // Removed contato route as per user request
 
 app.get('/sabio', (req, res) => {
