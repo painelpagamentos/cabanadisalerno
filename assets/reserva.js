@@ -145,21 +145,24 @@ function selectCabin(id) {
     if (cabana) {
         const display = document.getElementById('selectedCabinNameDisplay');
         if (display) display.innerText = "Você está reservando: " + cabana.nome;
+        
+        // Atualizar datas bloqueadas no calendário IMEDIATAMENTE para esta cabana
+        const bloqueiosCabana = bloqueios
+            .filter(b => b.cabanaId === id)
+            .map(b => ({ from: b.inicio, to: b.fim }));
+        
+        if (datePicker) {
+            datePicker.clear(); // Limpa seleção anterior se houver
+            datePicker.set('disable', bloqueiosCabana);
+        }
     }
-
-    // Atualizar datas bloqueadas no calendário para esta cabana
-    const bloqueiosCabana = bloqueios
-        .filter(b => b.cabanaId === id)
-        .map(b => ({ from: b.inicio, to: b.fim }));
-    
-    if (datePicker) datePicker.set('disable', bloqueiosCabana);
 }
 
 function iniciarReservaDireta(id) {
-    // Definir a cabana selecionada globalmente
+    // Definir a cabana selecionada e configurar calendário ANTES de abrir o modal
     selectCabin(id);
     
-    // Abrir o modal de reserva
+    // Abrir o modal de reserva já no passo 1 (Datas)
     openModalReserva();
 }
 
