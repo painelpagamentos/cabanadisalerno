@@ -33,15 +33,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h2>Fazer Minha Reserva</h2>
                 </div>
                 <div class="reserva-body">
-                    <!-- Step 1: Cabanas -->
+                    <!-- Step 1: Datas -->
                     <div id="step1" class="step active">
-                        <h3>1. Escolha sua Cabana</h3>
-                        <div id="cabanasList">Carregando cabanas...</div>
-                    </div>
-
-                    <!-- Step 2: Datas -->
-                    <div id="step2" class="step">
-                        <h3>2. Seleção de Datas</h3>
+                        <h3>1. Seleção de Datas</h3>
                         <div id="selectedCabinNameDisplay"></div>
                         <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Selecione a data de chegada e depois a de saída no calendário abaixo:</p>
                         <div id="userInlinePicker" style="margin-bottom: 15px;"></div>
@@ -51,31 +45,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <p id="diariasInfo" style="font-weight: bold; color: #3d85c6; text-align: center;"></p>
                     </div>
 
-                    <!-- Step 3: Hóspedes -->
-                    <div id="step3" class="step">
-                        <h3>3. Quantidade de Hóspedes</h3>
-                        <div class="guest-counter">
-                            <span>Adultos:</span>
-                            <div class="counter-btns">
-                                <button onclick="changeGuest('adultos', -1)">-</button>
-                                <span id="countAdultos">1</span>
-                                <button onclick="changeGuest('adultos', 1)">+</button>
-                            </div>
-                        </div>
-                        <div class="guest-counter">
-                            <span>Crianças (até 11 anos):</span>
-                            <div class="counter-btns">
-                                <button onclick="changeGuest('criancas', -1)">-</button>
-                                <span id="countCriancas">0</span>
-                                <button onclick="changeGuest('criancas', 1)">+</button>
-                            </div>
-                        </div>
-                        <p id="capacityWarning" class="capacity-warning">Limite de hóspedes da cabana atingido!</p>
-                    </div>
-
-                    <!-- Step 4: Dados -->
-                    <div id="step4" class="step">
-                        <h3>4. Dados do Responsável</h3>
+                    <!-- Step 2: Dados -->
+                    <div id="step2" class="step">
+                        <h3>2. Seus Dados</h3>
                         <div class="form-group">
                             <label>Nome Completo</label>
                             <input type="text" id="respNome" placeholder="Seu nome completo">
@@ -90,15 +62,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     </div>
 
-                    <!-- Step 5: Resumo -->
-                    <div id="step5" class="step">
-                        <h3>5. Resumo da Reserva</h3>
-                        <div id="summaryContent" class="summary-box"></div>
-                    </div>
-
-                    <!-- Step 6: Pagamento Pix -->
-                    <div id="step6" class="step">
-                        <h3>6. Pagamento de Sinal (50%)</h3>
+                    <!-- Step 3: Pagamento Pix -->
+                    <div id="step3" class="step">
+                        <h3>3. Pagamento de Sinal (50%)</h3>
+                        <div id="summaryContent" class="summary-box" style="margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-radius: 8px; font-size: 0.9em;"></div>
                         <div class="pix-container">
                             <p>Escaneie o QR Code abaixo para pagar o sinal de 50%:</p>
                             <div class="qr-placeholder">
@@ -232,9 +199,7 @@ function iniciarReservaDireta(id) {
     }
 
     // Abrir o modal de reserva
-    openModal();
-    // Avançar para o passo de datas (Step 2)
-    moveStep(1);
+    openModalReserva();
 }
 
 window.iniciarReservaDireta = iniciarReservaDireta;
@@ -267,53 +232,32 @@ function moveStep(dir) {
 
     document.getElementById('btnPrev').style.visibility = stepAtual === 1 ? 'hidden' : 'visible';
     
-    if (stepAtual === 6) {
+    if (stepAtual === 3) {
         document.getElementById('btnNext').style.display = 'none';
         document.getElementById('btnConfirm').style.display = 'block';
+        updateSummary();
     } else {
         document.getElementById('btnNext').style.display = 'block';
         document.getElementById('btnConfirm').style.display = 'none';
-        document.getElementById('btnNext').innerText = stepAtual === 5 ? 'Fazer Reserva' : 'Próximo';
+        document.getElementById('btnNext').innerText = 'Próximo';
     }
-
-    if (stepAtual === 5) updateSummary();
 }
 
 function validateStep(step) {
-    if (step === 1 && !reservaAtual.cabanaId) return alert('Selecione uma cabana.');
-    if (step === 2 && (!reservaAtual.checkIn || !reservaAtual.checkOut)) return alert('Selecione o período.');
-    if (step === 4) {
+    if (step === 1) {
+        if (!reservaAtual.cabanaId) return alert('Selecione uma cabana primeiro.');
+        if (!reservaAtual.checkIn || !reservaAtual.checkOut) return alert('Selecione o período.');
+    }
+    if (step === 2) {
         const nome = document.getElementById('respNome').value;
         const cpf = document.getElementById('respCpf').value;
         const tel = document.getElementById('respTel').value;
-        if (!nome || cpf.length < 14 || tel.length < 14) return alert('Preencha seus dados.');
+        if (!nome || cpf.length < 14 || tel.length < 14) return alert('Preencha seus dados corretamente.');
         reservaAtual.nome = nome;
         reservaAtual.cpf = cpf;
         reservaAtual.telefone = tel;
     }
     return true;
-}
-
-function changeGuest(type, val) {
-    const cabana = cabanas.find(c => c.id === reservaAtual.cabanaId);
-    const totalAtual = reservaAtual.adultos + reservaAtual.criancas;
-    if (type === 'adultos') {
-        const novo = reservaAtual.adultos + val;
-        if (novo >= 1 && (val < 0 || totalAtual < cabana.capacidade)) reservaAtual.adultos = novo;
-        else if (val > 0) showCapacityWarning();
-    } else {
-        const novo = reservaAtual.criancas + val;
-        if (novo >= 0 && (val < 0 || totalAtual < cabana.capacidade)) reservaAtual.criancas = novo;
-        else if (val > 0) showCapacityWarning();
-    }
-    document.getElementById('countAdultos').innerText = reservaAtual.adultos;
-    document.getElementById('countCriancas').innerText = reservaAtual.criancas;
-}
-
-function showCapacityWarning() {
-    const el = document.getElementById('capacityWarning');
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 3000);
 }
 
 function updateSummary() {
@@ -361,13 +305,13 @@ async function createPixCharge(amount, description) {
 
 // Updated finishBooking to generate PIX before sending reservation
 async function finishBooking() {
-    // Calculate total amount to charge (already stored in reservaAtual.total)
-    const amount = reservaAtual.total;
-    const description = `Reserva Cabana ${reservaAtual.cabanaId} - ${reservaAtual.checkIn} to ${reservaAtual.checkOut}`;
+    // Calculate total amount to charge (using signal 50% as per UI)
+    const amount = reservaAtual.sinal;
+    const description = `Sinal Reserva Cabana ${reservaAtual.cabanaId} - ${reservaAtual.checkIn} to ${reservaAtual.checkOut}`;
     try {
         const pixData = await createPixCharge(amount, description);
         // Update UI with PIX info
-        const pixImg = document.querySelector('#step6 .qr-placeholder img');
+        const pixImg = document.querySelector('#step3 .qr-placeholder img');
         if (pixImg && pixData.qrCodeUrl) {
             pixImg.src = pixData.qrCodeUrl;
         }
@@ -448,7 +392,6 @@ function clearDateSelection() {
     document.getElementById('diariasInfo').innerText = '';
 }
 
-window.changeGuest = changeGuest;
 window.copyPix = copyPix;
 window.iniciarReservaDireta = iniciarReservaDireta;
 window.clearDateSelection = clearDateSelection;
