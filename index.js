@@ -28,15 +28,22 @@ app.get('/api/bloqueios', (req, res) => {
 // Blackcat Pay PIX Creation
 app.post('/api/pix/create', async (req, res) => {
     const { amount, description, customer } = req.body;
-    const API_KEY = process.env.BLACKCAT_API_KEY;
+    let apiKey = (process.env.BLACKCAT_API_KEY || '').trim();
+    if (apiKey.toLowerCase().startsWith('x-api-key:')) {
+        apiKey = apiKey.split(':').slice(1).join(':').trim();
+    }
+    if (apiKey.toLowerCase().startsWith('bearer ')) {
+        apiKey = apiKey.slice('bearer '.length).trim();
+    }
 
     console.log('--- INICIANDO GERAÇÃO DE PIX (API v2) ---');
     console.log('Valor:', amount);
     console.log('Descrição:', description);
     console.log('Dados do Cliente:', customer);
-    console.log('API_KEY presente:', !!API_KEY);
+    console.log('API_KEY presente:', !!apiKey);
+    console.log('API_KEY tamanho:', apiKey.length);
 
-    if (!API_KEY) {
+    if (!apiKey) {
         console.error('ERRO: BLACKCAT_API_KEY não configurada no Railway!');
         return res.status(500).json({ success: false, message: 'Configuração de pagamento ausente no servidor (BLACKCAT_API_KEY).' });
     }
@@ -44,7 +51,10 @@ app.post('/api/pix/create', async (req, res) => {
     try {
         console.log('Chamando API Blackcat Pay: POST /api/sales/create-sale');
         
-        // Conversão para centavos e preparação do corpo conforme documentação
+        if (!customer || !customer.name || !customer.cpf || !customer.phone || !customer.email) {
+            return res.status(400).json({ success: false, message: 'Dados do cliente incompletos para gerar o PIX.' });
+        }
+
         const amountCents = Math.round(parseFloat(amount) * 100);
         
         const body = {
@@ -77,7 +87,7 @@ app.post('/api/pix/create', async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-Key': API_KEY
+                'X-API-Key': apiKey
             },
             body: JSON.stringify(body)
         });
@@ -97,13 +107,18 @@ app.post('/api/pix/create', async (req, res) => {
         const result = await response.json();
         console.log('Resposta da Blackcat com sucesso:', JSON.stringify(result, null, 2));
 
-        // Mapear campos da resposta da Blackcat para o frontend
-        // Conforme docs: result.data.paymentData.qrCode, result.data.paymentData.copyPaste
         if (result.success && result.data && result.data.paymentData) {
+            const paymentData = result.data.paymentData;
+            const qrCodeBase64 = paymentData.qrCodeBase64 || '';
+            const qrCodeString = paymentData.qrCode || paymentData.copyPaste || '';
+            const qrCodeUrl = qrCodeBase64
+                ? qrCodeBase64
+                : (qrCodeString ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrCodeString)}` : '');
+
             res.json({
                 success: true,
-                qrCodeUrl: result.data.paymentData.qrCodeBase64 || '', // Usamos o Base64 para exibir a imagem diretamente
-                copyPaste: result.data.paymentData.copyPaste || ''
+                qrCodeUrl,
+                copyPaste: paymentData.copyPaste || qrCodeString
             });
         } else {
             throw new Error('Resposta da API Blackcat em formato inesperado');

@@ -322,6 +322,11 @@ function openModal() {
 }
 
 function openModalReserva() {
+    if (!reservaAtual.cabanaId) {
+        alert('Selecione uma cabana clicando em "FAZER MINHA RESERVA".');
+        return;
+    }
+
     // Garantir que comece no primeiro passo
     stepAtual = 1;
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
