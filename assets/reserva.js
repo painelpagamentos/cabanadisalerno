@@ -194,21 +194,11 @@ function renderizarCabanas() {
 }
 
 function iniciarReservaDireta(id) {
-    console.log('FAZER MINHA RESERVA clicked, id:', id);
-    // Abre o modal sempre
-    openModal();
-    alert('Função iniciarReservaDireta executada'); // Debug alert
-    console.log('Modal opened');
-    // Seleciona a cabana visualmente na lista dentro do modal
-    const items = document.querySelectorAll('.cabin-item');
-    items.forEach(item => {
-        // Encontrar o card correspondente ao ID
-        if (item.getAttribute('onclick').includes(id)) {
-            selectCabin(id, item);
-        }
-    });
-    // Pula para o próximo passo (Datas)
-    moveStep(1);
+    const cabanaElement = Array.from(document.querySelectorAll('.cabin-item')).find(el => el.onclick.toString().includes(id));
+    if (cabanaElement) {
+        selectCabin(id, cabanaElement);
+        openModal();
+    }
 }
 
 window.iniciarReservaDireta = iniciarReservaDireta;
