@@ -229,17 +229,32 @@ function updateSummary() {
     const cabana = cabanas.find(c => c.id === reservaAtual.cabanaId);
     if (!cabana) return;
 
+    function formatPeriodo(isoDate) {
+        if (!isoDate) return '';
+        const [year, month, day] = isoDate.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${dd} de ${meses[date.getMonth()]}`;
+    }
+
     reservaAtual.total = cabana.valor * reservaAtual.diarias;
     reservaAtual.sinal = reservaAtual.total * 0.5;
     reservaAtual.restante = reservaAtual.total - reservaAtual.sinal;
 
+    const periodoFormatado = `${formatPeriodo(reservaAtual.checkIn)} até ${formatPeriodo(reservaAtual.checkOut)}`.trim();
+
     const summaryHtml = `
         <div class="summary-row"><span>Cabana:</span> <strong>${cabana.nome}</strong></div>
         <div class="summary-row"><span>Diária:</span> <strong>R$ ${cabana.valor.toFixed(2)}</strong></div>
-        <div class="summary-row"><span>Período:</span> <strong>${reservaAtual.checkIn} a ${reservaAtual.checkOut}</strong></div>
+        <div class="summary-row"><span>Período:</span> <strong>${periodoFormatado}</strong></div>
         <div class="summary-row"><span>Diárias:</span> <strong>${reservaAtual.diarias}</strong></div>
         <div class="summary-row summary-total"><span>TOTAL:</span> <strong>R$ ${reservaAtual.total.toFixed(2)}</strong></div>
         <div class="summary-row summary-pix"><span>SINAL (50%):</span> <strong>R$ ${reservaAtual.sinal.toFixed(2)}</strong></div>
+        <div class="summary-row"><span>Restante (no check-in):</span> <strong>R$ ${reservaAtual.restante.toFixed(2)}</strong></div>
+        <div style="margin-top: 12px; font-size: 0.9em; color: #333;">
+            Para efetivar a reserva, é pago 50% do valor agora (sinal). O restante é pago no check-in.
+        </div>
     `;
 
     const summaryEl = document.getElementById('summaryContent');
