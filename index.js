@@ -56,6 +56,8 @@ app.post('/api/pix/create', async (req, res) => {
         }
 
         const amountCents = Math.round(parseFloat(amount) * 100);
+        const postbackUrl = process.env.BLACKCAT_POSTBACK_URL;
+        const externalRef = `RES-${Date.now()}`;
         
         const body = {
             amount: amountCents,
@@ -63,8 +65,7 @@ app.post('/api/pix/create', async (req, res) => {
             paymentMethod: 'pix',
             items: [
                 {
-                    title: description.substring(0, 100),
-                    unitPrice: amountCents,
+                    title: (description || 'Reserva').substring(0, 100),
                     quantity: 1,
                     tangible: false
                 }
@@ -79,8 +80,11 @@ app.post('/api/pix/create', async (req, res) => {
                 }
             },
             pix: {
-                expiresInDays: 1
-            }
+                expiresInDays: 2
+            },
+            postbackUrl: postbackUrl || undefined,
+            metadata: (description || '').substring(0, 200) || undefined,
+            externalRef
         };
 
         const response = await fetch('https://api.blackcatpay.com.br/api/sales/create-sale', {
