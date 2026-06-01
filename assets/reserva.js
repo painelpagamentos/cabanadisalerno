@@ -234,8 +234,8 @@ function updateSummary() {
 }
 
 // Blackcat Pay integration via Backend
-async function createPixCharge(amount, description) {
-    console.log('Frontend: Solicitando geração de PIX ao backend...', { amount, description });
+async function createPixCharge(amount, description, customerData) {
+    console.log('Frontend: Solicitando geração de PIX ao backend...', { amount, description, customerData });
     try {
         const response = await fetch('/api/pix/create', {
             method: 'POST',
@@ -244,7 +244,8 @@ async function createPixCharge(amount, description) {
             },
             body: JSON.stringify({
                 amount: amount,
-                description: description
+                description: description,
+                customer: customerData
             })
         });
         
@@ -274,8 +275,15 @@ async function finishBooking() {
     
     console.log('Iniciando finishBooking...', { amount, description });
 
+    const customerData = {
+        name: reservaAtual.nome,
+        cpf: reservaAtual.cpf,
+        phone: reservaAtual.telefone,
+        email: 'contato@cabanasdisalerno.com.br' // E-mail padrão já que não pedimos no form
+    };
+
     try {
-        const pixData = await createPixCharge(amount, description);
+        const pixData = await createPixCharge(amount, description, customerData);
         console.log('PIX gerado com sucesso!', pixData);
 
         // Update UI with PIX info

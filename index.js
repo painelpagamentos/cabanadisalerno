@@ -27,12 +27,13 @@ app.get('/api/bloqueios', (req, res) => {
 
 // Blackcat Pay PIX Creation
 app.post('/api/pix/create', async (req, res) => {
-    const { amount, description } = req.body;
+    const { amount, description, customer } = req.body;
     const API_KEY = process.env.BLACKCAT_API_KEY;
 
-    console.log('--- INICIANDO GERAÇÃO DE PIX ---');
+    console.log('--- INICIANDO GERAÇÃO DE PIX (API v2) ---');
     console.log('Valor:', amount);
     console.log('Descrição:', description);
+    console.log('Dados do Cliente:', customer);
     console.log('API_KEY presente:', !!API_KEY);
 
     if (!API_KEY) {
@@ -41,17 +42,44 @@ app.post('/api/pix/create', async (req, res) => {
     }
 
     try {
-        console.log('Chamando API Blackcat Pay...');
-        const response = await fetch('https://api.blackcatpay.com.br/v1/pix', {
+        console.log('Chamando API Blackcat Pay: POST /api/sales/create-sale');
+        
+        // Conversão para centavos e preparação do corpo conforme documentação
+        const amountCents = Math.round(parseFloat(amount) * 100);
+        
+        const body = {
+            amount: amountCents,
+            currency: 'BRL',
+            paymentMethod: 'pix',
+            items: [
+                {
+                    title: description.substring(0, 100),
+                    unitPrice: amountCents,
+                    quantity: 1,
+                    tangible: false
+                }
+            ],
+            customer: {
+                name: customer.name,
+                email: customer.email,
+                phone: customer.phone.replace(/\D/g, ''),
+                document: {
+                    number: customer.cpf.replace(/\D/g, ''),
+                    type: 'cpf'
+                }
+            },
+            pix: {
+                expiresInDays: 1
+            }
+        };
+
+        const response = await fetch('https://api.blackcatpay.com.br/api/sales/create-sale', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
+                'X-API-Key': API_KEY
             },
-            body: JSON.stringify({
-                amount: amount,
-                description: description
-            })
+            body: JSON.stringify(body)
         });
 
         const status = response.status;
@@ -66,14 +94,20 @@ app.post('/api/pix/create', async (req, res) => {
             });
         }
 
-        const data = await response.json();
-        console.log('Resposta da Blackcat com sucesso:', JSON.stringify(data, null, 2));
+        const result = await response.json();
+        console.log('Resposta da Blackcat com sucesso:', JSON.stringify(result, null, 2));
 
-        res.json({
-            success: true,
-            qrCodeUrl: data.qrCodeUrl || data.qr_image || '',
-            copyPaste: data.copyPaste || data.copiable || data.pix_code || ''
-        });
+        // Mapear campos da resposta da Blackcat para o frontend
+        // Conforme docs: result.data.paymentData.qrCode, result.data.paymentData.copyPaste
+        if (result.success && result.data && result.data.paymentData) {
+            res.json({
+                success: true,
+                qrCodeUrl: result.data.paymentData.qrCodeBase64 || '', // Usamos o Base64 para exibir a imagem diretamente
+                copyPaste: result.data.paymentData.copyPaste || ''
+            });
+        } else {
+            throw new Error('Resposta da API Blackcat em formato inesperado');
+        }
     } catch (error) {
         console.error('ERRO CRÍTICO NA GERAÇÃO DO PIX:', error);
         res.status(500).json({ success: false, message: 'Erro interno ao processar PIX: ' + error.message });
