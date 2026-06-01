@@ -230,30 +230,27 @@ function updateSummary() {
     `;
 }
 
-// Blackcat Pay integration
+// Blackcat Pay integration via Backend
 async function createPixCharge(amount, description) {
-    // TODO: Replace with your actual Blackcat Pay API credentials
-    const API_KEY = 'YOUR_BLACKCAT_API_KEY';
-    const response = await fetch('https://api.blackcatpay.com.br/v1/pix', {
+    const response = await fetch('/api/pix/create', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             amount: amount,
-            description: description,
-            // optional: payer information, expiration, etc.
+            description: description
         })
     });
-    if (!response.ok) {
-        throw new Error('Failed to create PIX charge');
-    }
+    
     const data = await response.json();
-    // Expected fields: qrCodeUrl, copyPaste (Copia e Cola)
+    if (!data.success) {
+        throw new Error(data.message || 'Falha ao criar cobrança PIX');
+    }
+    
     return {
-        qrCodeUrl: data.qrCodeUrl || data.qr_image,
-        copyPaste: data.copyPaste || data.copiable || ''
+        qrCodeUrl: data.qrCodeUrl,
+        copyPaste: data.copyPaste
     };
 }
 

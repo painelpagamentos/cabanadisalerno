@@ -4,7 +4,6 @@ const PORT = process.env.PORT || 3000;
 const path = require('path');
 const fs = require('fs');
 const app = express();
-require('dotenv').config();
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -24,6 +23,47 @@ app.get('/api/cabanas', (req, res) => {
 app.get('/api/bloqueios', (req, res) => {
     const data = getData();
     res.json(data.bloqueios);
+});
+
+// Blackcat Pay PIX Creation
+app.post('/api/pix/create', async (req, res) => {
+    const { amount, description } = req.body;
+    const API_KEY = process.env.BLACKCAT_API_KEY;
+
+    if (!API_KEY) {
+        console.error('BLACKCAT_API_KEY is not set');
+        return res.status(500).json({ success: false, message: 'Configuração de pagamento ausente no servidor.' });
+    }
+
+    try {
+        const response = await fetch('https://api.blackcatpay.com.br/v1/pix', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API_KEY}`
+            },
+            body: JSON.stringify({
+                amount: amount,
+                description: description
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error('Blackcat API error:', errorData);
+            throw new Error('Falha ao gerar cobrança PIX na Blackcat.');
+        }
+
+        const data = await response.json();
+        res.json({
+            success: true,
+            qrCodeUrl: data.qrCodeUrl || data.qr_image || '',
+            copyPaste: data.copyPaste || data.copiable || data.pix_code || ''
+        });
+    } catch (error) {
+        console.error('PIX creation error:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 app.post('/api/reservas', (req, res) => {
