@@ -25,6 +25,46 @@ app.get('/api/bloqueios', (req, res) => {
     res.json(data.bloqueios);
 });
 
+// Diagnostic: Validate Blackcat API Key
+app.get('/api/pix/validate-key', async (req, res) => {
+    let apiKey = (process.env.BLACKCAT_API_KEY || '').trim();
+    if (apiKey.toLowerCase().startsWith('x-api-key:')) {
+        apiKey = apiKey.split(':').slice(1).join(':').trim();
+    }
+    if (apiKey.toLowerCase().startsWith('bearer ')) {
+        apiKey = apiKey.slice('bearer '.length).trim();
+    }
+    apiKey = apiKey.replace(/\s+/g, '');
+
+    if (!apiKey) {
+        return res.status(500).json({ success: false, message: 'BLACKCAT_API_KEY ausente no servidor.' });
+    }
+
+    try {
+        const response = await fetch('https://api.blackcatpay.com.br/api/sales/seller', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey
+            }
+        });
+
+        const status = response.status;
+        const text = await response.text();
+        console.log('Validate-key status:', status);
+        console.log('Validate-key body:', text);
+
+        if (!response.ok) {
+            return res.status(status).json({ success: false, status, message: text });
+        }
+
+        return res.json({ success: true, status, data: JSON.parse(text) });
+    } catch (e) {
+        console.error('Validate-key error:', e);
+        return res.status(500).json({ success: false, message: e.message });
+    }
+});
+
 // Blackcat Pay PIX Creation
 app.post('/api/pix/create', async (req, res) => {
     const { amount, description, customer } = req.body;
@@ -35,6 +75,7 @@ app.post('/api/pix/create', async (req, res) => {
     if (apiKey.toLowerCase().startsWith('bearer ')) {
         apiKey = apiKey.slice('bearer '.length).trim();
     }
+    apiKey = apiKey.replace(/\s+/g, '');
 
     console.log('--- INICIANDO GERAÇÃO DE PIX (API v2) ---');
     console.log('Valor:', amount);
