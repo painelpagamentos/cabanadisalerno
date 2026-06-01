@@ -194,11 +194,21 @@ function renderizarCabanas() {
 }
 
 function iniciarReservaDireta(id) {
-    const cabanaElement = Array.from(document.querySelectorAll('.cabin-item')).find(el => el.onclick.toString().includes(id));
-    if (cabanaElement) {
-        selectCabin(id, cabanaElement);
-        openModal();
+    // Find the button that triggered this call
+    const button = document.querySelector(`button[onclick*="${id}"]`);
+    if (button) {
+        // The .cabin-item is a sibling inside the same wrapper
+        const cabinItem = button.parentElement.querySelector('.cabin-item');
+        if (cabinItem) {
+            selectCabin(id, cabinItem);
+        }
     }
+    // Open the reservation modal
+    openModal();
+    // Advance to the next step (date selection) for better UX
+    moveStep(1);
+}
+
 }
 
 window.iniciarReservaDireta = iniciarReservaDireta;
