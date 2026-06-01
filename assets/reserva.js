@@ -194,21 +194,47 @@ function renderizarCabanas() {
 }
 
 function iniciarReservaDireta(id) {
-    // Find the button that triggered this call
+    // Definir a cabana selecionada globalmente
+    reservaAtual.cabanaId = id;
+    
+    // Tentar encontrar o elemento visual correspondente se estiver no modal
     const button = document.querySelector(`button[onclick*="${id}"]`);
     if (button) {
-        // The .cabin-item is a sibling inside the same wrapper
         const cabinItem = button.parentElement.querySelector('.cabin-item');
         if (cabinItem) {
             selectCabin(id, cabinItem);
+        } else {
+            // Se não encontrar o elemento .cabin-item (ex: botões na Home), 
+            // chamamos selectCabin apenas com o ID para atualizar o estado
+            const cabana = cabanas.find(c => c.id === id);
+            if (cabana) {
+                const display = document.getElementById('selectedCabinNameDisplay');
+                if (display) display.innerText = "Você está reservando: " + cabana.nome;
+                
+                // Atualizar datas bloqueadas no calendário
+                const bloqueiosCabana = bloqueios
+                    .filter(b => b.cabanaId === id)
+                    .map(b => ({ from: b.inicio, to: b.fim }));
+                if (datePicker) datePicker.set('disable', bloqueiosCabana);
+            }
+        }
+    } else {
+        // Caso o botão não seja encontrado via seletor (fallback)
+        const cabana = cabanas.find(c => c.id === id);
+        if (cabana) {
+            const display = document.getElementById('selectedCabinNameDisplay');
+            if (display) display.innerText = "Você está reservando: " + cabana.nome;
+            const bloqueiosCabana = bloqueios
+                .filter(b => b.cabanaId === id)
+                .map(b => ({ from: b.inicio, to: b.fim }));
+            if (datePicker) datePicker.set('disable', bloqueiosCabana);
         }
     }
-    // Open the reservation modal
-    openModal();
-    // Advance to the next step (date selection) for better UX
-    moveStep(1);
-}
 
+    // Abrir o modal de reserva
+    openModal();
+    // Avançar para o passo de datas (Step 2)
+    moveStep(1);
 }
 
 window.iniciarReservaDireta = iniciarReservaDireta;
@@ -369,12 +395,22 @@ async function finishBooking() {
     }
 }
 
-
-}
-
 function openModal() {
     document.getElementById('modalReserva').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+}
+
+function openModalReserva() {
+    // Garantir que comece no primeiro passo
+    stepAtual = 1;
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('btnPrev').style.visibility = 'hidden';
+    document.getElementById('btnNext').style.display = 'block';
+    document.getElementById('btnNext').innerText = 'Próximo';
+    document.getElementById('btnConfirm').style.display = 'none';
+    
+    openModal();
 }
 
 function closeModal() {
@@ -416,3 +452,5 @@ window.changeGuest = changeGuest;
 window.copyPix = copyPix;
 window.iniciarReservaDireta = iniciarReservaDireta;
 window.clearDateSelection = clearDateSelection;
+window.openModalReserva = openModalReserva;
+window.selectCabin = selectCabin;
