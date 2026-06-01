@@ -23,21 +23,21 @@ let stepAtual = 1;
 let datePicker = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const isReservaPage = !!document.getElementById('cabanaSelect');
+    const isReservaPage = !!document.getElementById('userInlinePicker');
     if (!isReservaPage) return;
 
     await carregarDados();
     configurarEventos();
-    preencherSelectCabanas();
 
     const params = new URLSearchParams(window.location.search);
     const preselectCabanaId = params.get('cabana') || sessionStorage.getItem('cabanaSelecionada');
-    if (preselectCabanaId) {
-        const select = document.getElementById('cabanaSelect');
-        if (select) select.value = preselectCabanaId;
-        selectCabin(preselectCabanaId);
-        sessionStorage.setItem('cabanaSelecionada', preselectCabanaId);
+    if (!preselectCabanaId) {
+        alert('Selecione uma cabana clicando em "FAZER MINHA RESERVA" na página inicial.');
+        window.location.href = '/#cabanas';
+        return;
     }
+    selectCabin(preselectCabanaId);
+    sessionStorage.setItem('cabanaSelecionada', preselectCabanaId);
 });
 
 async function carregarDados() {
@@ -102,65 +102,6 @@ function configurarEventos() {
     const respTel = document.getElementById('respTel');
     if (respCpf) respCpf.oninput = (e) => maskCpf(e.target);
     if (respTel) respTel.oninput = (e) => maskTel(e.target);
-
-    const cabanaSelect = document.getElementById('cabanaSelect');
-    if (cabanaSelect) {
-        cabanaSelect.onchange = (e) => {
-            const id = e.target.value;
-            resetReserva();
-            if (id) {
-                selectCabin(id);
-                sessionStorage.setItem('cabanaSelecionada', id);
-            } else {
-                sessionStorage.removeItem('cabanaSelecionada');
-            }
-        };
-    }
-}
-
-function preencherSelectCabanas() {
-    const select = document.getElementById('cabanaSelect');
-    if (!select) return;
-
-    select.innerHTML = '';
-    const optPlaceholder = document.createElement('option');
-    optPlaceholder.value = '';
-    optPlaceholder.textContent = 'Selecione uma cabana';
-    select.appendChild(optPlaceholder);
-
-    cabanas.forEach((c) => {
-        const opt = document.createElement('option');
-        opt.value = c.id;
-        opt.textContent = c.nome;
-        select.appendChild(opt);
-    });
-}
-
-function resetReserva() {
-    reservaAtual.cabanaId = null;
-    reservaAtual.checkIn = '';
-    reservaAtual.checkOut = '';
-    reservaAtual.checkInTime = '14:00';
-    reservaAtual.checkOutTime = '14:00';
-    reservaAtual.diarias = 0;
-    reservaAtual.total = 0;
-    reservaAtual.sinal = 0;
-    reservaAtual.restante = 0;
-
-    const display = document.getElementById('selectedCabinNameDisplay');
-    if (display) display.innerText = '';
-    const diariasInfo = document.getElementById('diariasInfo');
-    if (diariasInfo) diariasInfo.innerText = '';
-
-    if (datePicker) {
-        datePicker.clear();
-        datePicker.set('disable', []);
-    }
-
-    const timeCheckin = document.getElementById('timeCheckin');
-    const timeCheckout = document.getElementById('timeCheckout');
-    if (timeCheckin) timeCheckin.value = reservaAtual.checkInTime;
-    if (timeCheckout) timeCheckout.value = reservaAtual.checkOutTime;
 }
 
 function selectCabin(id) {
@@ -399,4 +340,4 @@ function copyPix() {
 
 window.copyPix = copyPix;
 window.iniciarReservaDireta = iniciarReservaDireta;
-window.openModalReserva = () => window.location.href = '/reserva';
+window.openModalReserva = () => window.location.href = '/#cabanas';
