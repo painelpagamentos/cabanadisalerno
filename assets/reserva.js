@@ -92,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     configurarEventos();
-    renderizarCabanas();
 });
 
 async function carregarDados() {
@@ -139,75 +138,8 @@ function configurarEventos() {
     document.getElementById('respTel').oninput = (e) => maskTel(e.target);
 }
 
-function renderizarCabanas() {
-    const list = document.getElementById('cabanasList');
-    list.innerHTML = '';
-    cabanas.forEach(c => {
-        const item = document.createElement('div');
-        item.className = 'cabin-item-wrapper'; // Wrapper para conter o card e o botão
-        item.innerHTML = `
-            <div class="cabin-item" onclick="selectCabin('${c.id}', this)">
-                <img src="${c.foto}" class="cabin-img">
-                <div class="cabin-info">
-                    <h3>${c.nome}</h3>
-                    <p>Capacidade: ${c.capacidade} pessoas</p>
-                    <p class="cabin-price">R$ ${c.valor.toFixed(2)} / diária</p>
-                </div>
-            </div>
-            <button class="btn-reserva-main btn-reserva-inline" onclick="iniciarReservaDireta('${c.id}')">FAZER MINHA RESERVA</button>
-        `;
-        list.appendChild(item);
-    });
-}
-
-function iniciarReservaDireta(id) {
-    // Definir a cabana selecionada globalmente
+function selectCabin(id) {
     reservaAtual.cabanaId = id;
-    
-    // Tentar encontrar o elemento visual correspondente se estiver no modal
-    const button = document.querySelector(`button[onclick*="${id}"]`);
-    if (button) {
-        const cabinItem = button.parentElement.querySelector('.cabin-item');
-        if (cabinItem) {
-            selectCabin(id, cabinItem);
-        } else {
-            // Se não encontrar o elemento .cabin-item (ex: botões na Home), 
-            // chamamos selectCabin apenas com o ID para atualizar o estado
-            const cabana = cabanas.find(c => c.id === id);
-            if (cabana) {
-                const display = document.getElementById('selectedCabinNameDisplay');
-                if (display) display.innerText = "Você está reservando: " + cabana.nome;
-                
-                // Atualizar datas bloqueadas no calendário
-                const bloqueiosCabana = bloqueios
-                    .filter(b => b.cabanaId === id)
-                    .map(b => ({ from: b.inicio, to: b.fim }));
-                if (datePicker) datePicker.set('disable', bloqueiosCabana);
-            }
-        }
-    } else {
-        // Caso o botão não seja encontrado via seletor (fallback)
-        const cabana = cabanas.find(c => c.id === id);
-        if (cabana) {
-            const display = document.getElementById('selectedCabinNameDisplay');
-            if (display) display.innerText = "Você está reservando: " + cabana.nome;
-            const bloqueiosCabana = bloqueios
-                .filter(b => b.cabanaId === id)
-                .map(b => ({ from: b.inicio, to: b.fim }));
-            if (datePicker) datePicker.set('disable', bloqueiosCabana);
-        }
-    }
-
-    // Abrir o modal de reserva
-    openModalReserva();
-}
-
-window.iniciarReservaDireta = iniciarReservaDireta;
-
-function selectCabin(id, element) {
-    reservaAtual.cabanaId = id;
-    document.querySelectorAll('.cabin-item').forEach(el => el.classList.remove('selected'));
-    element.classList.add('selected');
 
     const cabana = cabanas.find(c => c.id === id);
     if (cabana) {
@@ -220,26 +152,48 @@ function selectCabin(id, element) {
         .filter(b => b.cabanaId === id)
         .map(b => ({ from: b.inicio, to: b.fim }));
     
-    datePicker.set('disable', bloqueiosCabana);
+    if (datePicker) datePicker.set('disable', bloqueiosCabana);
+}
+
+function iniciarReservaDireta(id) {
+    // Definir a cabana selecionada globalmente
+    selectCabin(id);
+    
+    // Abrir o modal de reserva
+    openModalReserva();
 }
 
 function moveStep(dir) {
     if (dir === 1 && !validateStep(stepAtual)) return;
     stepAtual += dir;
 
+    // Atualizar visibilidade dos passos
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById(`step${stepAtual}`).classList.add('active');
+    const currentStepEl = document.getElementById(`step${stepAtual}`);
+    if (currentStepEl) currentStepEl.classList.add('active');
 
-    document.getElementById('btnPrev').style.visibility = stepAtual === 1 ? 'hidden' : 'visible';
+    updateButtonVisibility();
+}
+
+function updateButtonVisibility() {
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const btnConfirm = document.getElementById('btnConfirm');
+
+    if (!btnPrev || !btnNext || !btnConfirm) return;
+
+    // Botão Voltar: Oculto no primeiro passo
+    btnPrev.style.visibility = stepAtual === 1 ? 'hidden' : 'visible';
     
+    // Alternar entre Próximo e Confirmar Pagamento
     if (stepAtual === 3) {
-        document.getElementById('btnNext').style.display = 'none';
-        document.getElementById('btnConfirm').style.display = 'block';
+        btnNext.style.display = 'none';
+        btnConfirm.style.display = 'block';
         updateSummary();
     } else {
-        document.getElementById('btnNext').style.display = 'block';
-        document.getElementById('btnConfirm').style.display = 'none';
-        document.getElementById('btnNext').innerText = 'Próximo';
+        btnNext.style.display = 'block';
+        btnConfirm.style.display = 'none';
+        btnNext.innerText = 'Próximo';
     }
 }
 
@@ -349,11 +303,8 @@ function openModalReserva() {
     stepAtual = 1;
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     document.getElementById('step1').classList.add('active');
-    document.getElementById('btnPrev').style.visibility = 'hidden';
-    document.getElementById('btnNext').style.display = 'block';
-    document.getElementById('btnNext').innerText = 'Próximo';
-    document.getElementById('btnConfirm').style.display = 'none';
     
+    updateButtonVisibility();
     openModal();
 }
 

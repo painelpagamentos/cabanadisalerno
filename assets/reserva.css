@@ -7,22 +7,28 @@
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow-y: auto;
     background-color: rgba(0,0,0,0.8);
     backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alinha no topo para evitar corte em telas pequenas */
+    padding: 20px 0;
 }
 
 .reserva-content {
     background-color: #fff;
-    margin: 5% auto;
+    margin: 0 auto; /* Removido margin top/bottom para usar o padding do pai */
     padding: 0;
     border-radius: 15px;
-    width: 90%;
-    max-width: 800px;
+    width: 95%;
+    max-width: 600px;
     box-shadow: 0 5px 30px rgba(0,0,0,0.3);
     position: relative;
     overflow: hidden;
     font-family: 'Bitter', serif;
+    display: flex;
+    flex-direction: column;
 }
 
 .reserva-header {
@@ -40,8 +46,9 @@
 
 .reserva-body {
     padding: 30px;
-    max-height: 70vh;
+    max-height: 65vh; /* Reduzi um pouco para garantir visibilidade do rodapé */
     overflow-y: auto;
+    min-height: 300px;
 }
 
 .reserva-footer {
