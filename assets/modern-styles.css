@@ -127,8 +127,14 @@ nav ul li a:hover {
   background-image: url('../images/733c2d48ca594a3fb49fdb74db868a70.jpg');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  background-attachment: scroll;
   padding-top: 80px;
+}
+
+@media (min-width: 769px) {
+  .hero {
+    background-attachment: fixed;
+  }
 }
 
 .hero::before {

@@ -4,28 +4,28 @@
       "id": "campanella",
       "nome": "Cabana Campanella",
       "foto": "images/cc76537181e343a3bacc8b10ef797810.jpg",
-      "valor": 850,
+      "valor": 350,
       "capacidade": 2
     },
     {
       "id": "indrieri",
       "nome": "Cabana Indrieri",
       "foto": "images/bc381271a59848728a39e5f1acd61c6d.jpg",
-      "valor": 900,
+      "valor": 400,
       "capacidade": 2
     },
     {
       "id": "antunia",
       "nome": "Cabana Bella Antunia",
       "foto": "images/3ef4048cb6854a82bf58cdc5ab46a078.jpg",
-      "valor": 800,
+      "valor": 450,
       "capacidade": 2
     },
     {
       "id": "salerno",
       "nome": "Cabana Salerno",
       "foto": "images/5ccf37b3cf424a2ca0aae0fdec0efcde.jpg",
-      "valor": 1500,
+      "valor": 500,
       "capacidade": 4
     }
   ],
