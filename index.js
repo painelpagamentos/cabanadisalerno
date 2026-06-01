@@ -30,12 +30,18 @@ app.post('/api/pix/create', async (req, res) => {
     const { amount, description } = req.body;
     const API_KEY = process.env.BLACKCAT_API_KEY;
 
+    console.log('--- INICIANDO GERAÇÃO DE PIX ---');
+    console.log('Valor:', amount);
+    console.log('Descrição:', description);
+    console.log('API_KEY presente:', !!API_KEY);
+
     if (!API_KEY) {
-        console.error('BLACKCAT_API_KEY is not set');
-        return res.status(500).json({ success: false, message: 'Configuração de pagamento ausente no servidor.' });
+        console.error('ERRO: BLACKCAT_API_KEY não configurada no Railway!');
+        return res.status(500).json({ success: false, message: 'Configuração de pagamento ausente no servidor (BLACKCAT_API_KEY).' });
     }
 
     try {
+        console.log('Chamando API Blackcat Pay...');
         const response = await fetch('https://api.blackcatpay.com.br/v1/pix', {
             method: 'POST',
             headers: {
@@ -48,21 +54,31 @@ app.post('/api/pix/create', async (req, res) => {
             })
         });
 
+        const status = response.status;
+        console.log('Status da resposta Blackcat:', status);
+
         if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Blackcat API error:', errorData);
-            throw new Error('Falha ao gerar cobrança PIX na Blackcat.');
+            const errorText = await response.text();
+            console.error('Erro detalhado da Blackcat:', errorText);
+            return res.status(status).json({ 
+                success: false, 
+                message: `Erro na Blackcat (${status}): ${errorText}` 
+            });
         }
 
         const data = await response.json();
+        console.log('Resposta da Blackcat com sucesso:', JSON.stringify(data, null, 2));
+
         res.json({
             success: true,
             qrCodeUrl: data.qrCodeUrl || data.qr_image || '',
             copyPaste: data.copyPaste || data.copiable || data.pix_code || ''
         });
     } catch (error) {
-        console.error('PIX creation error:', error);
-        res.status(500).json({ success: false, message: error.message });
+        console.error('ERRO CRÍTICO NA GERAÇÃO DO PIX:', error);
+        res.status(500).json({ success: false, message: 'Erro interno ao processar PIX: ' + error.message });
+    } finally {
+        console.log('--- FIM DO PROCESSO DE PIX ---');
     }
 });
 

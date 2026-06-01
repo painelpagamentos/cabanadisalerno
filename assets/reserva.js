@@ -235,26 +235,35 @@ function updateSummary() {
 
 // Blackcat Pay integration via Backend
 async function createPixCharge(amount, description) {
-    const response = await fetch('/api/pix/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            amount: amount,
-            description: description
-        })
-    });
-    
-    const data = await response.json();
-    if (!data.success) {
-        throw new Error(data.message || 'Falha ao criar cobrança PIX');
+    console.log('Frontend: Solicitando geração de PIX ao backend...', { amount, description });
+    try {
+        const response = await fetch('/api/pix/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                amount: amount,
+                description: description
+            })
+        });
+        
+        const data = await response.json();
+        console.log('Frontend: Resposta do backend recebida:', data);
+
+        if (!data.success) {
+            console.error('Frontend: Erro retornado pelo backend:', data.message);
+            throw new Error(data.message || 'Falha ao criar cobrança PIX');
+        }
+        
+        return {
+            qrCodeUrl: data.qrCodeUrl,
+            copyPaste: data.copyPaste
+        };
+    } catch (err) {
+        console.error('Frontend: Falha na requisição de PIX:', err);
+        throw err;
     }
-    
-    return {
-        qrCodeUrl: data.qrCodeUrl,
-        copyPaste: data.copyPaste
-    };
 }
 
 // Updated finishBooking to generate PIX before sending reservation
@@ -262,8 +271,13 @@ async function finishBooking() {
     // Calculate total amount to charge (using signal 50% as per UI)
     const amount = reservaAtual.sinal;
     const description = `Sinal Reserva Cabana ${reservaAtual.cabanaId} - ${reservaAtual.checkIn} to ${reservaAtual.checkOut}`;
+    
+    console.log('Iniciando finishBooking...', { amount, description });
+
     try {
         const pixData = await createPixCharge(amount, description);
+        console.log('PIX gerado com sucesso!', pixData);
+
         // Update UI with PIX info
         const pixImg = document.querySelector('#step3 .qr-placeholder img');
         if (pixImg && pixData.qrCodeUrl) {
@@ -276,6 +290,7 @@ async function finishBooking() {
         // Show confirmation button only after PIX is ready
         document.getElementById('btnConfirm').style.display = 'block';
     } catch (e) {
+        console.error('Erro detalhado no finishBooking:', e);
         alert('Erro ao gerar PIX: ' + e.message);
         return;
     }
