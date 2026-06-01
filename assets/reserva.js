@@ -31,11 +31,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     preencherSelectCabanas();
 
     const params = new URLSearchParams(window.location.search);
-    const preselectCabanaId = params.get('cabana');
+    const preselectCabanaId = params.get('cabana') || sessionStorage.getItem('cabanaSelecionada');
     if (preselectCabanaId) {
         const select = document.getElementById('cabanaSelect');
         if (select) select.value = preselectCabanaId;
         selectCabin(preselectCabanaId);
+        sessionStorage.setItem('cabanaSelecionada', preselectCabanaId);
     }
 });
 
@@ -107,7 +108,12 @@ function configurarEventos() {
         cabanaSelect.onchange = (e) => {
             const id = e.target.value;
             resetReserva();
-            if (id) selectCabin(id);
+            if (id) {
+                selectCabin(id);
+                sessionStorage.setItem('cabanaSelecionada', id);
+            } else {
+                sessionStorage.removeItem('cabanaSelecionada');
+            }
         };
     }
 }
@@ -177,6 +183,7 @@ function selectCabin(id) {
 }
 
 function iniciarReservaDireta(id) {
+    sessionStorage.setItem('cabanaSelecionada', id);
     window.location.href = `/reserva?cabana=${encodeURIComponent(id)}`;
 }
 
