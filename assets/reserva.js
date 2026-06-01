@@ -39,9 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div id="selectedCabinNameDisplay"></div>
                         <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">Selecione a data de chegada e depois a de saída no calendário abaixo:</p>
                         <div id="userInlinePicker" style="margin-bottom: 15px;"></div>
-                        <div style="text-align: center; margin-bottom: 15px;">
-                            <button onclick="clearDateSelection()" style="background: #eee; border: 1px solid #ccc; padding: 5px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8em;">Limpar Seleção</button>
-                        </div>
                         <p id="diariasInfo" style="font-weight: bold; color: #3d85c6; text-align: center;"></p>
                     </div>
 
