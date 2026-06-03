@@ -273,6 +273,18 @@ function prepararTelaPagamento() {
 }
 
 async function confirmarEIrParaPagamento() {
+    const btnConfirm = document.getElementById('btnConfirm');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const originalText = btnConfirm ? btnConfirm.innerText : '';
+
+    if (btnConfirm) {
+        btnConfirm.disabled = true;
+        btnConfirm.innerText = 'Gerando PIX...';
+    }
+    if (btnPrev) btnPrev.disabled = true;
+    if (btnNext) btnNext.disabled = true;
+
     updateSummary();
     stepAtual = 4;
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
@@ -280,7 +292,16 @@ async function confirmarEIrParaPagamento() {
     updateButtonVisibility();
 
     prepararTelaPagamento();
-    await gerarPix();
+    try {
+        await gerarPix();
+    } finally {
+        if (btnConfirm) {
+            btnConfirm.disabled = false;
+            btnConfirm.innerText = originalText || 'Confirmar e Ir para Pagamento';
+        }
+        if (btnPrev) btnPrev.disabled = false;
+        if (btnNext) btnNext.disabled = false;
+    }
 }
 
 async function gerarPix() {
@@ -313,6 +334,7 @@ async function gerarPix() {
     } catch (e) {
         console.error('Erro detalhado no gerarPix:', e);
         alert('Erro ao gerar PIX: ' + e.message);
+        throw e;
     }
 }
 

@@ -264,6 +264,11 @@
     color: white;
 }
 
+.btn-next:disabled, .btn-prev:disabled, .btn-finish:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 .btn-prev {
     background-color: #ccc;
     color: #333;
